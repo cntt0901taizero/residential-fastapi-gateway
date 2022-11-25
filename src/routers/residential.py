@@ -18,7 +18,7 @@ get_db = database_odoo.get_db
 
 @router.post('/auth/login')
 async def login(request: residential_dto.ResidentialLoginInput):
-    url = 'http://localhost:8069/api/authenticate/login'
+    url = 'http://10.32.13.57:8069/api/authenticate/login'
     json_obj = {
         "jsonrpc": "2.0",
         "params": {
@@ -37,7 +37,7 @@ async def login(request: residential_dto.ResidentialLoginInput):
 
 @router.post('/auth/logout')
 def logout(session_id: str):
-    url = 'http://localhost:8069/api/authenticate/logout'
+    url = 'http://10.32.13.57:8069/api/authenticate/logout'
     cookies = {'session_id': session_id}
     headers = {'X-Openerp': session_id, 'Content-type': 'application/json'}
     json_obj = {}
@@ -53,7 +53,7 @@ def get_user(id: int, db: Session = Depends(get_db)):
 
 @router.post('/news/search-page')
 def news_search_page(request: residential_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
-    url = 'http://localhost:8069/api/news/search-page'
+    url = 'http://10.32.13.57:8069/api/news/search-page'
     json_obj = {
         "jsonrpc": "2.0",
         "params": {
