@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 get_db = database_odoo.get_db
-residential_server_ip = 'http://localhost:8069/'
+residential_server = 'http://localhost:8069/'
 
 
 @router.post('/auth/login')
@@ -46,7 +46,7 @@ async def login(request: userauth_dto.ResidentialLoginInput):
 
 @router.post('/auth/logout')
 async def logout(sid: str):
-    url = residential_server_ip + 'api/authenticate/logout'
+    url = residential_server + 'api/authenticate/logout'
     cookies = {'session_id': sid}
     headers = {'Content-type': 'application/json', 'X-Openerp': sid}
     json_obj = {}
@@ -56,7 +56,7 @@ async def logout(sid: str):
 
 @router.post('/auth/check-auth')
 async def check_auth(sid: str):
-    url = residential_server_ip + 'api/authenticate/check-auth'
+    url = residential_server + 'api/authenticate/check-auth'
     cookies = {'session_id': sid}
     headers = {'Content-type': 'application/json', 'X-Openerp': sid}
     json_obj = {}
@@ -76,7 +76,7 @@ async def get_user(sid: str, db: Session = Depends(get_db)):
 
 @router.post('/news/search-page')
 async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
-    url = residential_server_ip + 'api/news/search-page'
+    url = residential_server + 'api/news/search-page'
     headers = {'Content-type': 'application/json'}
     json_obj = {
         "jsonrpc": "2.0",
@@ -87,3 +87,24 @@ async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = 
     }
     rs = requests.post(url=url, json=json_obj, headers=headers)
     return json.loads(rs.text)
+
+
+@router.post('/notification/search-page')
+async def news_search_page(request: common_dto.SearchPageInput, db: Session = Depends(get_db)):
+    check = await check_auth(request.sid)
+    if check.get('data') > 0:
+        res = residential_repo.search_notification_page(db)
+        return CommonResponse.value(200, 'Success', res)
+    else:
+        return CommonResponse.value(500, 'Error', None)
+
+
+@router.post('/banner/search-page')
+async def news_search_page(request: common_dto.SearchPageInput, db: Session = Depends(get_db)):
+    check = await check_auth(request.sid)
+    if check.get('data') > 0:
+        res = residential_repo.search_banner_page(db)
+        return CommonResponse.value(200, 'Success', res)
+    else:
+        return CommonResponse.value(500, 'Error', None)
+

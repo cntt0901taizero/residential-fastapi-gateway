@@ -7,6 +7,12 @@ class GetByIdInput(BaseModel):
     id: Optional[int] = 0
 
 
+class SearchPageInput(BaseModel):
+    sid: Optional[str] = ''
+    current_page: Optional[int] = 0
+    page_size: Optional[int] = 10
+
+
 class CommonResponse(BaseModel):
     @staticmethod
     def value(status: int, message: '', data: None):
