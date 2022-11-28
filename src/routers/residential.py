@@ -14,52 +14,71 @@ router = APIRouter(
 )
 
 get_db = database_odoo.get_db
-residential_server_ip = 'http://10.32.13.57:8069/'
+residential_server_ip = 'http://localhost:8069/'
 
 
 @router.post('/auth/login')
 async def login(request: residential_dto.ResidentialLoginInput):
-    url = residential_server_ip + 'api/authenticate/login'
-    json_obj = {
-        "jsonrpc": "2.0",
-        "params": {
-            # "db": 'odoo_db_dev',
-            "login": request.login,
-            "password": request.password
+    try:
+        url = residential_server_ip + 'api/authenticate/login'
+        json_obj = {
+            "jsonrpc": "2.0",
+            "params": {
+                # "db": 'odoo_db_dev',
+                "login": request.login,
+                "password": request.password
+            }
         }
-    }
-    rs = requests.post(url=url, json=json_obj)
-    if rs.status_code != 200:
+        rs = requests.post(url=url, json=json_obj)
+        rs_json = json.loads(rs.text)
+        if rs_json.get('status') != 200:
+            return {
+                'status': rs_json.get('status'),
+                'message': rs_json.get('message'),
+                'data': []
+            }
+        header = (rs.headers.get('Set-Cookie')).split(';')
+        data = json.loads(rs.text)
+        data['data']['sid'] = str((header[0].split('='))[1])
+        data['data']['expires_time'] = str((header[1].split('='))[1])
+        return data
+
+    except Exception as e:
         return {
-            'status': rs.status_code,
-            'message': 'Error',
+            'status': 500,
+            'message': e,
             'data': []
         }
-    header = (rs.headers.get('Set-Cookie')).split(';')
-    data = json.loads(rs.text)
-    data['data']['sid'] = str((header[0].split('='))[1])
-    data['data']['expires_time'] = str((header[1].split('='))[1])
-    return data
 
 
 @router.post('/auth/logout')
-def logout(session_id: str):
+async def logout(session_id: str):
     url = residential_server_ip + 'api/authenticate/logout'
     cookies = {'session_id': session_id}
-    headers = {'X-Openerp': session_id, 'Content-type': 'application/json'}
+    headers = {'X-Openerp': session_id}
+    json_obj = {}
+    rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
+    return json.loads(rs.text)
+
+
+@router.post('/auth/check-auth')
+async def logout(session_id: str):
+    url = residential_server_ip + 'api/authenticate/check-auth'
+    cookies = {'session_id': session_id}
+    headers = {'X-Openerp': session_id}
     json_obj = {}
     rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
     return json.loads(rs.text)
 
 
 @router.post('/user/get/{id}')
-def get_user(id: int, db: Session = Depends(get_db)):
+async def get_user(id: int, db: Session = Depends(get_db)):
     res = residential_repo.get_user_by_id(id, db)
     return res
 
 
 @router.post('/news/search-page')
-def news_search_page(request: residential_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
+async def news_search_page(request: residential_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
     url = residential_server_ip + 'api/news/search-page'
     json_obj = {
         "jsonrpc": "2.0",
