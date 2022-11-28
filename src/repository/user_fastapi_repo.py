@@ -1,9 +1,8 @@
-
 from sqlalchemy.orm import Session
 from src.schemas import fastapi_dto
 from src.models import fastapi_models
 from fastapi import HTTPException, status
-from src.service.hashing import Hash
+from src.hashing import Hash
 
 
 def create(request: fastapi_dto.User, db: Session):

@@ -1,12 +1,12 @@
 from src import database_odoo
-from src.schemas import residential_dto
-from src.models import fastapi_models
+from src.schemas.residential import common_dto, userauth_dto, news_dto
 from sqlalchemy.orm import Session
-from sqlalchemy import text
-from fastapi import APIRouter, Depends, status
-from src.repository import user, residential_repo
+from fastapi import APIRouter, Depends
+from src.repository import residential_repo
 import requests
 import json
+
+from src.schemas.residential.common_dto import CommonResponse
 
 router = APIRouter(
     prefix="/residential",
@@ -18,9 +18,10 @@ residential_server_ip = 'http://localhost:8069/'
 
 
 @router.post('/auth/login')
-async def login(request: residential_dto.ResidentialLoginInput):
+async def login(request: userauth_dto.ResidentialLoginInput):
     try:
         url = residential_server_ip + 'api/authenticate/login'
+        headers = {'Content-type': 'application/json'}
         json_obj = {
             "jsonrpc": "2.0",
             "params": {
@@ -29,14 +30,10 @@ async def login(request: residential_dto.ResidentialLoginInput):
                 "password": request.password
             }
         }
-        rs = requests.post(url=url, json=json_obj)
+        rs = requests.post(url=url, json=json_obj, headers=headers)
         rs_json = json.loads(rs.text)
         if rs_json.get('status') != 200:
-            return {
-                'status': rs_json.get('status'),
-                'message': rs_json.get('message'),
-                'data': []
-            }
+            return CommonResponse(rs_json.get('status'), rs_json.get('message'), None)
         header = (rs.headers.get('Set-Cookie')).split(';')
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
@@ -44,48 +41,49 @@ async def login(request: residential_dto.ResidentialLoginInput):
         return data
 
     except Exception as e:
-        return {
-            'status': 500,
-            'message': e,
-            'data': []
-        }
+        return CommonResponse(500, 'Error', None)
 
 
 @router.post('/auth/logout')
-async def logout(session_id: str):
+async def logout(sid: str):
     url = residential_server_ip + 'api/authenticate/logout'
-    cookies = {'session_id': session_id}
-    headers = {'X-Openerp': session_id}
+    cookies = {'session_id': sid}
+    headers = {'Content-type': 'application/json', 'X-Openerp': sid}
     json_obj = {}
     rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
     return json.loads(rs.text)
 
 
 @router.post('/auth/check-auth')
-async def logout(session_id: str):
+async def check_auth(sid: str):
     url = residential_server_ip + 'api/authenticate/check-auth'
-    cookies = {'session_id': session_id}
-    headers = {'X-Openerp': session_id}
+    cookies = {'session_id': sid}
+    headers = {'Content-type': 'application/json', 'X-Openerp': sid}
     json_obj = {}
     rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
     return json.loads(rs.text)
 
 
-@router.post('/user/get/{id}')
-async def get_user(id: int, db: Session = Depends(get_db)):
-    res = residential_repo.get_user_by_id(id, db)
-    return res
+@router.post('/user/get')
+async def get_user(sid: str, db: Session = Depends(get_db)):
+    check = await check_auth(sid)
+    if check.get('data') > 0:
+        res = residential_repo.get_user_by_id(check.get('data'), db)
+        return CommonResponse.value(200, 'Success', res)
+    else:
+        return CommonResponse.value(500, 'Error', None)
 
 
 @router.post('/news/search-page')
-async def news_search_page(request: residential_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
+async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
     url = residential_server_ip + 'api/news/search-page'
+    headers = {'Content-type': 'application/json'}
     json_obj = {
         "jsonrpc": "2.0",
         "params": {
-             "current_page": request.current_page,
-             "page_size": request.page_size
+            "current_page": request.current_page,
+            "page_size": request.page_size
         }
     }
-    rs = requests.post(url=url, json=json_obj)
+    rs = requests.post(url=url, json=json_obj, headers=headers)
     return json.loads(rs.text)
