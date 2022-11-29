@@ -20,7 +20,7 @@ residential_server = 'http://localhost:8069/'
 @router.post('/auth/login')
 async def login(request: userauth_dto.ResidentialLoginInput):
     try:
-        url = residential_server_ip + 'api/authenticate/login'
+        url = residential_server + 'api/authenticate/login'
         headers = {'Content-type': 'application/json'}
         json_obj = {
             "jsonrpc": "2.0",
