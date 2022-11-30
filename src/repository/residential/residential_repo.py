@@ -2,12 +2,12 @@ from sqlalchemy.orm import Session
 from src import database_odoo
 from fastapi import Depends
 from sqlalchemy import text
+from config import get_settings
 
 get_db = database_odoo.get_db
-residential_server = 'http://localhost:8069/'
 
 
-def get_user_by_id(uid: int, db: Session = Depends(get_db)):
+async def get_user_by_id(uid: int, db: Session = Depends(get_db)):
     sql = text('select '
                'id, active, login, company_id, partner_id, create_date, '
                'signature, notification_type, phone_number '
@@ -18,10 +18,11 @@ def get_user_by_id(uid: int, db: Session = Depends(get_db)):
     return result
 
 
-def search_news_page(db: Session = Depends(get_db)):
+async def search_news_page(db: Session = Depends(get_db)):
     sql = text('select '
                'id, name, '
-               'concat("/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
+               'concat(' + get_settings().residential_server_url +
+               ', "/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
                'create_date, write_date, expired_date '
                'from tb_news where state = "ACTIVE" '
                'order by id asc')
@@ -29,10 +30,11 @@ def search_news_page(db: Session = Depends(get_db)):
     return result
 
 
-def get_news_detail(id: int, db: Session = Depends(get_db)):
+async def get_news_detail(id: int, db: Session = Depends(get_db)):
     sql = text('select '
                'id, name, content, file_name, '
-               'concat("/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
+               'concat(' + get_settings().residential_server_url +
+               ', "/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
                'create_date, write_date, expired_date '
                'from tb_news where id = ' + str(id))
     result = [dict(row) for row in db.execute(sql)]
@@ -42,7 +44,7 @@ def get_news_detail(id: int, db: Session = Depends(get_db)):
     return result
 
 
-def search_notification_page(db: Session = Depends(get_db)):
+async def search_notification_page(db: Session = Depends(get_db)):
     sql = text('select '
                'id, name, content, type, state, '
                'create_date, write_date '
@@ -52,10 +54,11 @@ def search_notification_page(db: Session = Depends(get_db)):
     return result
 
 
-def search_banner_page(db: Session = Depends(get_db)):
+async def search_banner_page(db: Session = Depends(get_db)):
     sql = text('select '
                'id, name, banner_description, '
-               'concat("/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
+               'concat(' + get_settings().residential_server_url +
+               ', "/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
                'create_date, write_date '
                'from tb_banner '
                'order by create_date asc')

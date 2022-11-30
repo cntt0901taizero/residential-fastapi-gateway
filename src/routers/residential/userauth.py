@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Request
 from src.repository.residential import residential_repo
 from src.schemas.residential.common_dto import CommonResponse
+from config import get_settings
 import requests
 import json
 
@@ -14,13 +15,12 @@ router = APIRouter(
 )
 
 get_db = database_odoo.get_db
-residential_server = 'http://10.32.13.57:8069/'
 
 
 @router.post('/auth/login')
 async def login(request: userauth_dto.ResidentialLoginInput):
     try:
-        url = residential_server + 'api/authenticate/login'
+        url = get_settings().residential_server_url + '/api/authenticate/login'
         headers = {'Content-type': 'application/json'}
         json_obj = {
             "jsonrpc": "2.0",
@@ -41,24 +41,28 @@ async def login(request: userauth_dto.ResidentialLoginInput):
         return data
 
     except Exception as e:
-        return CommonResponse.value(500, 'Error', None)
+        return CommonResponse.value(500, e.args[0], None)
 
 
 @router.post('/auth/logout')
-async def logout(request: Request):
-    sid = request.headers.get('sid')
-    url = residential_server + 'api/authenticate/logout'
-    cookies = {'session_id': sid}
-    headers = {'Content-type': 'application/json', 'X-Openerp': sid}
-    json_obj = {}
-    rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
-    return json.loads(rs.text)
+async def logout(sid: str, request: Request):
+    try:
+        sid = sid if sid == '' else request.headers.get('sid')
+        url = get_settings().residential_server_url + '/api/authenticate/logout'
+        cookies = {'session_id': sid}
+        headers = {'Content-type': 'application/json', 'X-Openerp': sid}
+        json_obj = {}
+        rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
+        return json.loads(rs.text)
+
+    except Exception as e:
+        return CommonResponse.value(500, e.args[0], None)
 
 
 @router.post('/auth/check-auth')
-async def check_auth(request: Request):
-    sid = request.headers.get('sid')
-    url = residential_server + 'api/authenticate/check-auth'
+async def check_auth(sid: str, request: Request):
+    sid = sid if sid == '' else request.headers.get('sid')
+    url = get_settings().residential_server_url + '/api/authenticate/check-auth'
     cookies = {'session_id': sid}
     headers = {'Content-type': 'application/json', 'X-Openerp': sid}
     json_obj = {}
@@ -67,14 +71,19 @@ async def check_auth(request: Request):
 
 
 @router.post('/user/get')
-async def get_user(request: Request, db: Session = Depends(get_db)):
-    sid = request.headers.get('sid')
-    check = await check_auth(sid)
-    if check.get('data') > 0:
-        res = residential_repo.get_user_by_id(check.get('data'), db)
-        return CommonResponse.value(200, 'Success', res)
-    else:
-        return CommonResponse.value(500, 'Error', None)
+async def get_user(sid: str, request: Request, db: Session = Depends(get_db)):
+    try:
+        sid = sid if sid == '' else request.headers.get('sid')
+        check = await check_auth(sid)
+        if check.get('data') > 0:
+            res = await residential_repo.get_user_by_id(check.get('data'), db)
+            return CommonResponse.value(200, 'Success', res)
+        else:
+            return CommonResponse.value(500, 'Error', None)
+
+    except Exception as e:
+        return CommonResponse(500, e.args[0], None)
+
 
 
 
