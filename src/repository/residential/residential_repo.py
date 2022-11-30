@@ -21,6 +21,7 @@ def get_user_by_id(uid: int, db: Session = Depends(get_db)):
 def search_news_page(db: Session = Depends(get_db)):
     sql = text('select '
                'id, name, '
+               'concat("/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
                'create_date, write_date, expired_date '
                'from tb_news where state = "ACTIVE" '
                'order by id asc')
@@ -31,6 +32,7 @@ def search_news_page(db: Session = Depends(get_db)):
 def get_news_detail(id: int, db: Session = Depends(get_db)):
     sql = text('select '
                'id, name, content, file_name, '
+               'concat("/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
                'create_date, write_date, expired_date '
                'from tb_news where id = ' + str(id))
     result = [dict(row) for row in db.execute(sql)]
@@ -53,6 +55,7 @@ def search_notification_page(db: Session = Depends(get_db)):
 def search_banner_page(db: Session = Depends(get_db)):
     sql = text('select '
                'id, name, banner_description, '
+               'concat("/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
                'create_date, write_date '
                'from tb_banner '
                'order by create_date asc')

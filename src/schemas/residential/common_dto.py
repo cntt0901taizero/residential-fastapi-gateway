@@ -3,12 +3,10 @@ from pydantic import BaseModel
 
 
 class GetByIdInput(BaseModel):
-    sid: Optional[str] = ''
     id: Optional[int] = 0
 
 
 class SearchPageInput(BaseModel):
-    sid: Optional[str] = ''
     current_page: Optional[int] = 0
     page_size: Optional[int] = 10
 

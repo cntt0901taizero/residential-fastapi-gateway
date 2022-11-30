@@ -7,7 +7,7 @@ from src.repository import user_fastapi_repo
 
 router = APIRouter(
     prefix="/userfastapi",
-    tags=['UsersFastApi']
+    tags=['Users FastAPI']
 )
 
 get_db = database_fastapi.get_db
