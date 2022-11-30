@@ -5,6 +5,7 @@ from pydantic import BaseModel, BaseSettings
 class ResidentialLoginInput(BaseModel):
     login: str
     password: str
+    fcmToken: str
 
 
 

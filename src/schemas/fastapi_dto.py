@@ -8,6 +8,11 @@ class User(BaseModel):
     password: str
 
 
+class FcmToken(BaseModel):
+    fcm_token: str
+    user_id: int
+
+
 class ShowUser(BaseModel):
     name: str
     email: str
@@ -25,7 +30,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
-
 
 #
 # class BlogBase(BaseModel):
@@ -54,7 +58,3 @@ class TokenData(BaseModel):
 #
 #     class Config:
 #         orm_mode = True
-
-
-
-
