@@ -14,6 +14,7 @@ app.include_router(residential.router)
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='localhost', port=8000)
+    uvicorn.run(app, host='10.32.47.64', port=8000)
+    # uvicorn.run(app, host='localhost', port=8000)
 
 
