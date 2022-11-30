@@ -35,6 +35,8 @@ async def get_news_detail(id: int, db: Session = Depends(get_db)):
                'id, name, content, file_name, '
                'concat(' + get_settings().residential_server_url +
                ', "/web/image?", "model=tb_news&id=", id , "&field=image") as image_url, '
+               'concat(' + get_settings().residential_server_url +
+               ', "/web/content/tb_news/", id , "/file") as file_url, '
                'create_date, write_date, expired_date '
                'from tb_news where id = ' + str(id))
     result = [dict(row) for row in db.execute(sql)]
