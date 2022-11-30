@@ -1,10 +1,11 @@
 from src import database_odoo
 from src.schemas.residential import userauth_dto
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Header
 from src.repository.residential import residential_repo
 from src.schemas.residential.common_dto import CommonResponse
 from config import get_settings
+from typing import List, Optional, Union
 import requests
 import json
 
@@ -47,10 +48,12 @@ async def login(request: userauth_dto.ResidentialLoginInput):
 @router.post('/auth/logout')
 async def logout(sid: str, request: Request):
     try:
-        sid = sid if sid == '' else request.headers.get('sid')
+        _sid = request.headers.get('sid')
+        if not _sid or _sid == '':
+            _sid = sid
         url = get_settings().residential_server_url + '/api/authenticate/logout'
-        cookies = {'session_id': sid}
-        headers = {'Content-type': 'application/json', 'X-Openerp': sid}
+        cookies = {'session_id': _sid}
+        headers = {'Content-type': 'application/json', 'X-Openerp': _sid}
         json_obj = {}
         rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
         return json.loads(rs.text)
@@ -61,10 +64,12 @@ async def logout(sid: str, request: Request):
 
 @router.post('/auth/check-auth')
 async def check_auth(sid: str, request: Request):
-    sid = sid if sid == '' else request.headers.get('sid')
+    _sid = request.headers.get('sid')
+    if not _sid or _sid == '':
+        _sid = sid
     url = get_settings().residential_server_url + '/api/authenticate/check-auth'
-    cookies = {'session_id': sid}
-    headers = {'Content-type': 'application/json', 'X-Openerp': sid}
+    cookies = {'session_id': _sid}
+    headers = {'Content-type': 'application/json', 'X-Openerp': _sid}
     json_obj = {}
     rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
     return json.loads(rs.text)
@@ -73,8 +78,10 @@ async def check_auth(sid: str, request: Request):
 @router.post('/user/get')
 async def get_user(sid: str, request: Request, db: Session = Depends(get_db)):
     try:
-        sid = sid if sid == '' else request.headers.get('sid')
-        check = await check_auth(sid)
+        _sid = request.headers.get('sid')
+        if not _sid or _sid == '':
+            _sid = sid
+        check = await check_auth(_sid)
         if check.get('data') > 0:
             res = await residential_repo.get_user_by_id(check.get('data'), db)
             return CommonResponse.value(200, 'Success', res)
