@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from src.repository import residential_repo
 import requests
 import json
-
+from src.repository import user_fastapi_repo
 from src.schemas.residential.common_dto import CommonResponse
 
 router = APIRouter(
@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 get_db = database_odoo.get_db
-residential_server = 'http://localhost:8069/'
+residential_server = 'http://10.32.13.57:8069/'
 
 
 @router.post('/auth/login')
@@ -27,7 +27,8 @@ async def login(request: userauth_dto.ResidentialLoginInput):
             "params": {
                 # "db": 'odoo_db_dev',
                 "login": request.login,
-                "password": request.password
+                "password": request.password,
+                "fcmToken": request.fcmToken
             }
         }
         rs = requests.post(url=url, json=json_obj, headers=headers)
@@ -35,6 +36,7 @@ async def login(request: userauth_dto.ResidentialLoginInput):
         if rs_json.get('status') != 200:
             return CommonResponse(rs_json.get('status'), rs_json.get('message'), None)
         header = (rs.headers.get('Set-Cookie')).split(';')
+        user_fastapi_repo.init_fcm_token()
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
         data['data']['expires_time'] = str((header[1].split('='))[1])
@@ -42,7 +44,6 @@ async def login(request: userauth_dto.ResidentialLoginInput):
 
     except Exception as e:
         return CommonResponse(500, 'Error', None)
-
 
 @router.post('/auth/logout')
 async def logout(sid: str):
