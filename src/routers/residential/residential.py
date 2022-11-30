@@ -33,16 +33,14 @@ async def news_search_page(param: news_dto.NewsSearchPageInput, db: Session = De
         return json.loads(rs.text)
 
     except Exception as e:
-        return CommonResponse(500, 'Error', None)
+        return CommonResponse.value(500, e.args[0], None)
 
 
 @router.post('/notification/search-page')
-async def notification_search_page(sid: str, param: common_dto.SearchPageInput,
+async def notification_search_page(param: common_dto.SearchPageInput,
                                    request: Request, db: Session = Depends(get_db)):
     try:
         _sid = request.headers.get('sid')
-        if not _sid or _sid == '':
-            _sid = sid
         check = await check_auth(_sid)
         if check.get('data') > 0:
             res = residential_repo.search_notification_page(db)
@@ -51,15 +49,13 @@ async def notification_search_page(sid: str, param: common_dto.SearchPageInput,
             return CommonResponse.value(500, 'Error', None)
 
     except Exception as e:
-        return CommonResponse(500, 'Error', None)
+        return CommonResponse.value(500, e.args[0], None)
 
 
 @router.post('/banner/search-page')
-async def banner_search_page(sid: str, request: Request, db: Session = Depends(get_db)):
+async def banner_search_page(request: Request, db: Session = Depends(get_db)):
     try:
         _sid = request.headers.get('sid')
-        if not _sid or _sid == '':
-            _sid = sid
         check = await check_auth(_sid)
         if check.get('data') > 0:
             res = residential_repo.search_banner_page(db)
@@ -68,7 +64,7 @@ async def banner_search_page(sid: str, request: Request, db: Session = Depends(g
             return CommonResponse.value(500, 'Error', None)
 
     except Exception as e:
-        return CommonResponse(500, 'Error', None)
+        return CommonResponse.value(500, e.args[0], None)
 
 
 

@@ -46,11 +46,9 @@ async def login(request: userauth_dto.ResidentialLoginInput):
 
 
 @router.post('/auth/logout')
-async def logout(sid: str, request: Request):
+async def logout(request: Request):
     try:
         _sid = request.headers.get('sid')
-        if not _sid or _sid == '':
-            _sid = sid
         url = get_settings().residential_server_url + '/api/authenticate/logout'
         cookies = {'session_id': _sid}
         headers = {'Content-type': 'application/json', 'X-Openerp': _sid}
@@ -62,25 +60,19 @@ async def logout(sid: str, request: Request):
         return CommonResponse.value(500, e.args[0], None)
 
 
-@router.post('/auth/check-auth')
-async def check_auth(sid: str, request: Request):
-    _sid = request.headers.get('sid')
-    if not _sid or _sid == '':
-        _sid = sid
+async def check_auth(sid: str):
     url = get_settings().residential_server_url + '/api/authenticate/check-auth'
-    cookies = {'session_id': _sid}
-    headers = {'Content-type': 'application/json', 'X-Openerp': _sid}
+    cookies = {'session_id': sid}
+    headers = {'Content-type': 'application/json', 'X-Openerp': sid}
     json_obj = {}
     rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
     return json.loads(rs.text)
 
 
 @router.post('/user/get')
-async def get_user(sid: str, request: Request, db: Session = Depends(get_db)):
+async def get_user(request: Request, db: Session = Depends(get_db)):
     try:
         _sid = request.headers.get('sid')
-        if not _sid or _sid == '':
-            _sid = sid
         check = await check_auth(_sid)
         if check.get('data') > 0:
             res = await residential_repo.get_user_by_id(check.get('data'), db)
@@ -89,7 +81,7 @@ async def get_user(sid: str, request: Request, db: Session = Depends(get_db)):
             return CommonResponse.value(500, 'Error', None)
 
     except Exception as e:
-        return CommonResponse(500, e.args[0], None)
+        return CommonResponse.value(500, e.args[0], None)
 
 
 
