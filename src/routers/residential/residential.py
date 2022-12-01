@@ -43,8 +43,15 @@ async def notification_search_page(param: common_dto.SearchPageInput,
         _sid = request.headers.get('sid')
         check = await check_auth(_sid)
         if check.get('data') > 0:
-            res = await residential_repo.search_notification_page(db)
-            return CommonResponse.value(200, 'Success', res)
+            res = await residential_repo.search_notification_page(param, db)
+            data_page = {
+                "page_list_data": res,
+                "size": param.page_size,
+                "total_pages": "",
+                "total_items": "",
+                "current_page": param.current_page if param.current_page > 0 else 0,
+            }
+            return CommonResponse.value(200, 'Success', data_page)
         else:
             return CommonResponse.value(500, 'Error', None)
 
@@ -53,13 +60,21 @@ async def notification_search_page(param: common_dto.SearchPageInput,
 
 
 @router.post('/banner/search-page')
-async def banner_search_page(request: Request, db: Session = Depends(get_db)):
+async def banner_search_page(param: common_dto.SearchPageInput,
+                             request: Request, db: Session = Depends(get_db)):
     try:
         _sid = request.headers.get('sid')
         check = await check_auth(_sid)
         if check.get('data') > 0:
-            res = await residential_repo.search_banner_page(db)
-            return CommonResponse.value(200, 'Success', res)
+            res = await residential_repo.search_banner_page(param, db)
+            data_page = {
+                "page_list_data": res,
+                "size": param.page_size,
+                "total_pages": "",
+                "total_items": "",
+                "current_page": param.current_page if param.current_page > 0 else 0,
+            }
+            return CommonResponse.value(200, 'Success', data_page)
         else:
             return CommonResponse.value(500, 'Error', None)
 
