@@ -20,7 +20,7 @@ get_db = database_odoo.get_db
 
 
 @router.post('/auth/login')
-async def login(request: userauth_dto.ResidentialLoginInput):
+async def login(request: userauth_dto.ResidentialLoginInput, db: Session = Depends(get_db)):
     try:
         url = get_settings().residential_server_url + '/api/authenticate/login'
         headers = {'Content-type': 'application/json'}
@@ -40,7 +40,7 @@ async def login(request: userauth_dto.ResidentialLoginInput):
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
         data['data']['expires_time'] = str((header[1].split('='))[1])
-        await init_fcm_token(id=data['data']['id'], fcm_token=request.fcmToken)
+        await init_fcm_token(id=data['data']['id'], fcm_token=request.fcmToken, db=db)
         return data
 
     except Exception as e:
@@ -48,7 +48,7 @@ async def login(request: userauth_dto.ResidentialLoginInput):
 
 
 @router.post('/auth/logout')
-async def logout(fcm_token: str, request: Request):
+async def logout(fcm_token: str, request: Request, db: Session = Depends(get_db)):
     try:
         _sid = request.headers.get('sid')
         url = get_settings().residential_server_url + '/api/authenticate/logout'
@@ -56,7 +56,7 @@ async def logout(fcm_token: str, request: Request):
         headers = {'Content-type': 'application/json', 'X-Openerp': _sid}
         json_obj = {}
         rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
-        await del_fcm_token(id=rs.get('data'), fcm_token=fcm_token)
+        await del_fcm_token(id=rs.get('data'), fcm_token=fcm_token, db=db)
         return json.loads(rs.text)
 
     except Exception as e:
