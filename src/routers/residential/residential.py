@@ -43,7 +43,7 @@ async def notification_search_page(param: common_dto.SearchPageInput,
         _sid = request.headers.get('sid')
         check = await check_auth(_sid)
         if check.get('data') > 0:
-            res = residential_repo.search_notification_page(db)
+            res = await residential_repo.search_notification_page(db)
             return CommonResponse.value(200, 'Success', res)
         else:
             return CommonResponse.value(500, 'Error', None)
@@ -58,7 +58,7 @@ async def banner_search_page(request: Request, db: Session = Depends(get_db)):
         _sid = request.headers.get('sid')
         check = await check_auth(_sid)
         if check.get('data') > 0:
-            res = residential_repo.search_banner_page(db)
+            res = await residential_repo.search_banner_page(db)
             return CommonResponse.value(200, 'Success', res)
         else:
             return CommonResponse.value(500, 'Error', None)
