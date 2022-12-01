@@ -1,4 +1,5 @@
 from src import database_odoo
+from src.repository.Paginate import paginate
 from src.schemas.residential import common_dto, userauth_dto, news_dto
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
