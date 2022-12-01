@@ -76,18 +76,13 @@ async def get_user(sid: str, db: Session = Depends(get_db)):
 
 @router.post('/news/search-page')
 async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
-    url = residential_server + 'api/news/search-page'
-    headers = {'Content-type': 'application/json'}
-    json_obj = {
-        "jsonrpc": "2.0",
-        "params": {
-            "current_page": request.current_page,
-            "page_size": request.page_size
-        }
-    }
-    rs = requests.post(url=url, json=json_obj, headers=headers)
-    return json.loads(rs.text)
-
+    check = await check_auth(request.sid)
+    if check.get('data') > 0:
+        res = residential_repo.search_news_page(db)
+        paginate_data = paginate(data=res, total=len(res), page_num=request.current_page, page_size=request.page_size)
+        return CommonResponse.value(200, 'Success', paginate_data)
+    else:
+        return CommonResponse.value(500, 'Error', None)
 
 @router.post('/notification/search-page')
 async def news_search_page(request: common_dto.SearchPageInput, db: Session = Depends(get_db)):
