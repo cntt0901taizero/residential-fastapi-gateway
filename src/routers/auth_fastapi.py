@@ -6,7 +6,7 @@ from src.hashing import Hash
 from sqlalchemy.orm import Session
 
 router = APIRouter(
-    tags=['Authentication FastApi']
+    tags=['Authentication FastAPI']
 )
 
 
