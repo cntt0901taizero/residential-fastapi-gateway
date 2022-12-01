@@ -43,7 +43,7 @@ async def notification_search_page(param: common_dto.SearchPageInput,
         _sid = request.headers.get('sid')
         check = await check_auth(_sid)
         if check.get('data') > 0:
-            res = await residential_repo.search_notification_page(param, db)
+            res = await residential_repo.search_notification_page(check.get('data'), param, db)
             data_page = {
                 "page_list_data": res,
                 "size": param.page_size,

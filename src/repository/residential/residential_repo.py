@@ -45,11 +45,11 @@ async def get_news_detail(id: int, db: Session = Depends(get_db)):
     return result
 
 
-async def search_notification_page(param: common_dto.SearchPageInput, db: Session = Depends(get_db)):
+async def search_notification_page(id: int, param: common_dto.SearchPageInput, db: Session = Depends(get_db),):
     sql = text("select "
-               "id, name, content, type, state, "
-               "create_date, write_date "
-               "from tb_notification "
+               "id, name, content, type, notification_status, create_date, write_date "
+               "from tb_push_notification "
+               "where user_id = " + str(id) + " "
                "order by id asc "
                "limit " + str(param.page_size) + " offset " + str(param.page_size * param.current_page))
     result = [dict(row) for row in db.execute(sql)]
