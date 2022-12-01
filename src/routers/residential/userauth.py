@@ -1,5 +1,5 @@
 from src import database_odoo
-from src.repository.residential.fcm_token_repo import init_fcm_token
+from src.repository.residential.fcm_token_repo import init_fcm_token, del_fcm_token
 from src.schemas.fastapi_dto import FcmToken
 from src.schemas.residential import userauth_dto
 from sqlalchemy.orm import Session
@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, Request, Header
 from src.repository.residential import residential_repo
 from src.schemas.residential.common_dto import CommonResponse
 from config import get_settings
-from typing import List, Optional, Union
 import requests
 import json
 
@@ -41,8 +40,7 @@ async def login(request: userauth_dto.ResidentialLoginInput, db: Session = Depen
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
         data['data']['expires_time'] = str((header[1].split('='))[1])
-        new_fcm_token = FcmToken(fcm_token=request.fcmToken, user_id=data['data']['id'])
-        init_fcm_token(request=new_fcm_token, db=db)
+        init_fcm_token(id=data['data']['id'], fcm_token=request.fcmToken)
         return data
 
     except Exception as e:
@@ -50,7 +48,7 @@ async def login(request: userauth_dto.ResidentialLoginInput, db: Session = Depen
 
 
 @router.post('/auth/logout')
-async def logout(request: Request):
+async def logout(fcm_token: str, request: Request):
     try:
         _sid = request.headers.get('sid')
         url = get_settings().residential_server_url + '/api/authenticate/logout'
@@ -58,6 +56,7 @@ async def logout(request: Request):
         headers = {'Content-type': 'application/json', 'X-Openerp': _sid}
         json_obj = {}
         rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
+        del_fcm_token(id=rs.get('data'), fcm_token=fcm_token)
         return json.loads(rs.text)
 
     except Exception as e:
