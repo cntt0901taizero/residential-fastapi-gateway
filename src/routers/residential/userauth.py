@@ -1,4 +1,6 @@
 from src import database_odoo
+from src.repository.residential.fcm_token_repo import init_fcm_token
+from src.schemas.fastapi_dto import FcmToken
 from src.schemas.residential import userauth_dto
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Request, Header
@@ -19,7 +21,7 @@ get_db = database_odoo.get_db
 
 
 @router.post('/auth/login')
-async def login(request: userauth_dto.ResidentialLoginInput):
+async def login(request: userauth_dto.ResidentialLoginInput, db: Session = Depends(get_db)):
     try:
         url = get_settings().residential_server_url + '/api/authenticate/login'
         headers = {'Content-type': 'application/json'}
@@ -39,6 +41,8 @@ async def login(request: userauth_dto.ResidentialLoginInput):
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
         data['data']['expires_time'] = str((header[1].split('='))[1])
+        new_fcm_token = FcmToken(fcm_token=request.fcmToken, user_id=data['data']['id'])
+        init_fcm_token(request=new_fcm_token, db=db)
         return data
 
     except Exception as e:
