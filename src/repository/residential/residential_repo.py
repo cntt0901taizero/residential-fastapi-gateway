@@ -52,7 +52,14 @@ async def search_notification_page(id: int, param: common_dto.SearchPageInput, d
                "limit " + str(param.page_size) + " offset " + str(param.page_size * param.current_page))
     result = [dict(row) for row in db.execute(sql)]
     return result
-
+async def read_notification(id: int, db: Session = Depends(get_db),):
+    sql = text("update "
+               "tb_push_notification "
+               "set notification_status = " + "SEEN" + " "
+               "where id = " + str(id) + " "
+               "order by id asc ")
+    db.execute(sql)
+    return None
 
 async def search_banner_page(param: common_dto.SearchPageInput, db: Session):
     sql = text("select "
