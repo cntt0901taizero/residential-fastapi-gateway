@@ -59,13 +59,13 @@ async def notification_search_page(param: common_dto.SearchPageInput,
         return CommonResponse.value(500, e.args[0], None)
 
 
-@router.post('/notification/read/{id}')
+@router.put('/notification/read/{id}')
 async def read_notification(id: int, request: Request, db: Session = Depends(get_db)):
     try:
         _sid = request.headers.get('sid')
         check = await check_auth(_sid)
         if check.get('data') > 0:
-            res = await residential_repo.read_notification(id=id, db=db)
+            await residential_repo.read_notification(id=id, db=db)
             return CommonResponse.value(200, 'Success', id)
         else:
             return CommonResponse.value(500, 'Error', None)
