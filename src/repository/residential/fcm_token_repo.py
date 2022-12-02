@@ -21,4 +21,5 @@ async def init_fcm_token(id: int, fcm_token: str, db: Session):
 async def del_fcm_token(id: int, fcm_token: str, db: Session):
     sql = text("delete from tb_fcm_token where name=" + fcm_token + " and user_id=" + id)
     db.execute(sql)
+    db.commit()
     return None
