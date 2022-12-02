@@ -5,10 +5,8 @@ from sqlalchemy import text
 from config import get_settings
 from src.schemas.residential import common_dto
 
-get_db = database_odoo.get_db
 
-
-async def get_user_by_id(uid: int, db: Session = Depends(get_db)):
+async def get_user_by_id(uid: int, db: Session):
     sql = text("select id, active, login, company_id, partner_id, "
                "create_date, signature, notification_type, phone_number "
                "from res_users where id = " + str(uid))
@@ -18,7 +16,7 @@ async def get_user_by_id(uid: int, db: Session = Depends(get_db)):
     return result
 
 
-async def search_news_page(db: Session = Depends(get_db)):
+async def search_news_page(db: Session):
     sql = text("select id, name, "
                "concat('" + get_settings().residential_server_url +
                "', '/web/image?', 'model=tb_news&id=', id , '&field=image') as image_url, "
@@ -29,7 +27,7 @@ async def search_news_page(db: Session = Depends(get_db)):
     return result
 
 
-async def get_news_detail(id: int, db: Session = Depends(get_db)):
+async def get_news_detail(id: int, db: Session):
     sql = text("select "
                "id, name, content, file_name, "
                "concat('" + get_settings().residential_server_url +
@@ -45,7 +43,7 @@ async def get_news_detail(id: int, db: Session = Depends(get_db)):
     return result
 
 
-async def search_notification_page(id: int, param: common_dto.SearchPageInput, db: Session = Depends(get_db),):
+async def search_notification_page(id: int, param: common_dto.SearchPageInput, db: Session):
     sql = text("select "
                "id, name, content, type, notification_status, create_date, write_date "
                "from tb_push_notification "
@@ -63,7 +61,7 @@ async def read_notification(id: int, db: Session = Depends(get_db),):
     db.execute(sql)
     return None
 
-async def search_banner_page(param: common_dto.SearchPageInput, db: Session = Depends(get_db)):
+async def search_banner_page(param: common_dto.SearchPageInput, db: Session):
     sql = text("select "
                "id, name, banner_description, "
                "concat('" + get_settings().residential_server_url +
