@@ -4,7 +4,7 @@ from src.schemas.fastapi_dto import FcmToken
 from src.schemas.residential import userauth_dto
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Request, Header
-from src.repository.residential import residential_repo
+from src.repository.residential import residential_repo, user_repo
 from src.schemas.residential.common_dto import CommonResponse
 from config import get_settings
 import requests
@@ -78,7 +78,7 @@ async def get_user(request: Request, db: Session = Depends(get_db)):
         _sid = request.headers.get('sid')
         check = await check_auth(_sid)
         if check.get('data') > 0:
-            res = await residential_repo.get_user_by_id(check.get('data'), db)
+            res = await user_repo.get_user_by_id(check.get('data'), db)
             return CommonResponse.value(200, 'Success', res)
         else:
             return CommonResponse.value(500, 'Error', None)
