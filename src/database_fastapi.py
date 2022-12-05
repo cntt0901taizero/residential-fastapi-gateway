@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 SQLALCHAMY_DATABASE_URL = 'postgresql://admin:abbankadmin@10.32.13.58:5432/fastapi_db_dev'
 engine = create_engine(SQLALCHAMY_DATABASE_URL, poolclass=NullPool)
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False,)
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=True)
 Base = declarative_base()
 
 
