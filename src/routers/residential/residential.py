@@ -20,14 +20,15 @@ get_db = database_odoo.get_db
 
 @router.post('/news/search-page')
 async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
-    check = await check_auth(request.sid)
-    if check.get('data') > 0:
-        res = residential_repo.search_news_page(db)
-        data = res.get('page_list_data')
-        paginate_data = paginate(data=data, total=len(data), page_num=request.current_page, page_size=request.page_size)
+    # check = await check_auth(request.sid)
+    # if check.get('data') > 0:
+        res = await residential_repo.search_news_page(db,request.current_page,request.page_size)
+        total = await residential_repo.total(db)
+        # data = res.get('page_list_data')
+        paginate_data = paginate(data=res, total=total, page_num=request.current_page, page_size=request.page_size)
         return CommonResponse.value(200, 'Success', paginate_data)
-    else:
-        return CommonResponse.value(500, 'Error', None)
+    # else:
+    #     return CommonResponse.value(500, 'Error', None)
 
 
 @router.post('/notification/search-page')

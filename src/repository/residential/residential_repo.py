@@ -17,14 +17,34 @@ async def get_user_by_id(uid: int, db: Session = Depends(get_db)):
     # result[0]['password'] = ''
     return result
 
-
-async def search_news_page(db: Session = Depends(get_db)):
+async def total(db: Session):
     sql = text("select id, name, "
                "concat('" + get_settings().residential_server_url +
                "', '/web/image?', 'model=tb_news&id=', id , '&field=image') as image_url, "
                "create_date, write_date, expired_date "
                "from tb_news where state = 'ACTIVE' "
-               "order by id asc")
+               "order by id asc "
+               )
+    result = [dict(row) for row in db.execute(sql)]
+    return len(result)
+
+def count_offset(page_num: int, page_size: int):
+    if page_num in (0, 1):
+        offset = 0
+    else:
+        offset = (page_num * page_size) - page_size
+    return offset
+
+async def search_news_page(db: Session, page_num: int = 0, page_size: int = 100):
+    offset = count_offset(page_num, page_size)
+    sql = text("select id, name, "
+               "concat('" + get_settings().residential_server_url +
+               "', '/web/image?', 'model=tb_news&id=', id , '&field=image') as image_url, "
+               "create_date, write_date, expired_date "
+               "from tb_news where state = 'ACTIVE' "
+               "order by id asc "
+               f"limit {page_size} offset {offset}"
+               )
     result = [dict(row) for row in db.execute(sql)]
     return result
 
