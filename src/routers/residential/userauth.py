@@ -87,6 +87,21 @@ async def get_user(request: Request, db: Session = Depends(get_db)):
         return CommonResponse.value(500, e.args[0], None)
 
 
+# @router.post('/user/update')
+# async def update(param, request: Request, db: Session = Depends(get_db)):
+#     try:
+#         _sid = request.headers.get('sid')
+#         check = await check_auth(_sid)
+#         if check.get('data') > 0:
+#             res = await user_repo.get_user_by_id(check.get('data'), db)
+#             return CommonResponse.value(200, 'Success', res)
+#         else:
+#             return CommonResponse.value(500, 'Error', None)
+#
+#     except Exception as e:
+#         return CommonResponse.value(500, e.args[0], None)
+
+
 
 
 

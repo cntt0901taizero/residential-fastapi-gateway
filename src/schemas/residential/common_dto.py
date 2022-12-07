@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from pydantic import BaseModel
 
 
@@ -11,14 +11,24 @@ class SearchPageInput(BaseModel):
     page_size: Optional[int] = 10
 
 
-class CommonResponse(BaseModel):
+class PageOutput(BaseModel):
+    page_list_data: Optional[List] = []
+    size: Optional[int] = 10
+    total_pages: Optional[int] = 0
+    total_items: Optional[int] = 0
+    current_page: Optional[int] = 0
+
+
+class CommonResponseOutputDto(BaseModel):
+    status: Optional[int] = 500
+    message: Optional[str] = ''
+    data: Any = None
+
+
+class CommonResponse:
     @staticmethod
     def value(status: int, message: '', data: None):
-        return {
-            'status': status,
-            'message': message,
-            'data': data,
-        }
+        return CommonResponseOutputDto(status=status, message=message, data=data)
 
 
 
