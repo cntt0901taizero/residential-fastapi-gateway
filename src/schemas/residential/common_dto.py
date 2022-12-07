@@ -25,7 +25,7 @@ class CommonResponseOutputDto(BaseModel):
     data: Any = None
 
 
-class CommonResponse(BaseModel):
+class CommonResponse:
     @staticmethod
     def value(status: int, message: '', data: None):
         return CommonResponseOutputDto(status=status, message=message, data=data)
