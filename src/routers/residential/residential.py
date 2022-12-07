@@ -1,4 +1,5 @@
 from src import database_odoo
+from src.repository.Paginate import paginate
 from src.routers.residential.userauth import check_auth
 from src.schemas.residential import common_dto, news_dto
 from sqlalchemy.orm import Session
@@ -18,22 +19,16 @@ get_db = database_odoo.get_db
 
 
 @router.post('/news/search-page')
-async def news_search_page(param: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
-    try:
-        url = get_settings().residential_server_url + '/api/news/search-page'
-        headers = {'Content-type': 'application/json'}
-        json_obj = {
-            "jsonrpc": "2.0",
-            "params": {
-                "current_page": param.current_page,
-                "page_size": param.page_size
-            }
-        }
-        rs = requests.post(url=url, json=json_obj, headers=headers)
-        return json.loads(rs.text)
-
-    except Exception as e:
-        return CommonResponse.value(500, e.args[0], None)
+async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
+    # check = await check_auth(request.sid)
+    # if check.get('data') > 0:
+        res = await residential_repo.search_news_page(db,request.current_page,request.page_size)
+        total = await residential_repo.total(db)
+        # data = res.get('page_list_data')
+        paginate_data = paginate(data=res, total=total, page_num=request.current_page, page_size=request.page_size)
+        return CommonResponse.value(200, 'Success', paginate_data)
+    # else:
+    #     return CommonResponse.value(500, 'Error', None)
 
 
 @router.post('/notification/search-page')
