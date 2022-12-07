@@ -1,9 +1,12 @@
 from src import database_odoo
 from src.repository.Paginate import paginate
 from src.routers.residential.userauth import check_auth
+from src.schemas.resident import Resident
 from src.schemas.residential import common_dto, news_dto
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Path, Query
+from starlette import status as http_status
 from src.repository.residential import residential_repo
 from src.schemas.residential.common_dto import CommonResponse
 from config import get_settings
@@ -17,7 +20,19 @@ router = APIRouter(
 
 get_db = database_odoo.get_db
 
-
+@router.get(
+    "/residents/{id}",
+    response_model=Resident,
+    status_code=http_status.HTTP_200_OK,
+)
+async def get_resident(id: int = Path(title="Room ID")):
+    resident = Resident(
+        id=id,
+        name="Căn hộ An Binh A3",
+        owner="Thiện",
+        floor=3
+    )
+    return resident
 @router.post('/news/search-page')
 async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
     # check = await check_auth(request.sid)
