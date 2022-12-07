@@ -40,7 +40,7 @@ async def search_news_page(db: Session, page_num: int = 0, page_size: int = 100)
     sql = text("select id, name, "
                "concat('" + get_settings().residential_server_url +
                "', '/web/image?', 'model=tb_news&id=', id , '&field=image') as image_url, "
-               "create_date, write_date, expired_date "
+               "create_date, write_date, expired_date, content "
                "from tb_news where state = 'ACTIVE' "
                "order by id asc "
                f"limit {page_size} offset {offset}"
