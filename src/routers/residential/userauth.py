@@ -40,7 +40,7 @@ async def login(request: userauth_dto.ResidentialLoginInput, db: Session = Depen
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
         data['data']['expires_time'] = str((header[1].split('='))[1])
-        await init_fcm_token(id=data['data']['id'], fcm_token=request.fcmToken, db=db)
+        await init_fcm_token(id=data['data']['id'], fcm_token=request.fcm_token, db=db)
         return data
 
     except Exception as e:
