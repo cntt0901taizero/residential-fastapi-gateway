@@ -1,6 +1,9 @@
+from typing import List
+
 from src import database_odoo
 from src.repository.Paginate import paginate
 from src.routers.residential.userauth import check_auth
+from src.schemas.apartment import Apartment
 from src.schemas.resident import Resident
 from src.schemas.residential import common_dto, news_dto
 from sqlalchemy.orm import Session
@@ -20,16 +23,44 @@ router = APIRouter(
 
 get_db = database_odoo.get_db
 
+
+@router.get("/apartments", response_model=List[Apartment])
+async def get_apartments():
+    aparments = []
+    for i in range(1, 5):
+        residents = []
+        for j in range(1,3):
+            resident = Resident(
+                id=j,
+                name="Khai AB1",
+                image="https://m.media-amazon.com/images/I/61EAm1WvFvL._AC_SX425_.jpg"
+            )
+            residents.append(resident)
+        apartment = Apartment(
+            id=i,
+            code=f"Room {i}",
+            building="AnBinhA3",
+            name="12020",
+            floor=12,
+            bloc_house="AB18",
+            residents=residents,
+        )
+        aparments.append(apartment)
+    return aparments
 @router.get(
     "/residents/{id}",
     response_model=Resident,
     status_code=http_status.HTTP_200_OK,
 )
+
 async def get_resident(id: int = Path(title="Room ID")):
     resident = Resident(
         id=id,
-        name="Căn hộ An Binh A3",
-        owner="Thiện",
+        code="A2010",
+        building="An Binh City A3",
+        name="2010",
+        bloc_house="ABCity",
+        owner="KhaiMTC",
         floor=3
     )
     return resident
