@@ -24,29 +24,33 @@ router = APIRouter(
 get_db = database_odoo.get_db
 
 
-@router.get("/apartments", response_model=List[Apartment])
+@router.get("/apartments")
 async def get_apartments():
-    aparments = []
-    for i in range(1, 5):
-        residents = []
-        for j in range(1,3):
-            resident = Resident(
-                id=j,
-                name="Khai AB1",
-                image="https://m.media-amazon.com/images/I/61EAm1WvFvL._AC_SX425_.jpg"
+    try:
+        aparments = []
+        for i in range(1, 5):
+            residents = []
+            for j in range(1, 3):
+                resident = Resident(
+                    id=j,
+                    name="Khai AB1",
+                    image="https://m.media-amazon.com/images/I/61EAm1WvFvL._AC_SX425_.jpg"
+                )
+                residents.append(resident)
+            apartment = Apartment(
+                id=i,
+                code=f"Room {i}",
+                building="AnBinhA3",
+                name="12020",
+                floor=12,
+                bloc_house="AB18",
+                residents=residents,
             )
-            residents.append(resident)
-        apartment = Apartment(
-            id=i,
-            code=f"Room {i}",
-            building="AnBinhA3",
-            name="12020",
-            floor=12,
-            bloc_house="AB18",
-            residents=residents,
-        )
-        aparments.append(apartment)
-    return aparments
+            aparments.append(apartment)
+        return CommonResponse.value(200, 'Success', apartment)
+    except Exception as e:
+        return CommonResponse.value(500, e.args[0], None)
+
 @router.get(
     "/residents/{id}",
     response_model=Resident,
