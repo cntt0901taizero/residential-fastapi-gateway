@@ -89,14 +89,17 @@ async def notification_search_page(param: common_dto.SearchPageInput,
         check = await check_auth(_sid)
         if check.get('data') > 0:
             res = await residential_repo.search_notification_page(check.get('data'), param, db)
-            data_page = {
-                "page_list_data": res,
-                "size": param.page_size,
-                "total_pages": "",
-                "total_items": "",
-                "current_page": param.current_page if param.current_page > 0 else 0,
-            }
-            return CommonResponse.value(200, 'Success', data_page)
+            total = await residential_repo.count_notifications(id=check.get('data'), db= db)
+            # data_page = {
+            #     "page_list_data": res,
+            #     "size": param.page_size,
+            #     "total_pages": "",
+            #     "total_items": "",
+            #     "current_page": param.current_page if param.current_page > 0 else 0,
+            # }
+            # return CommonResponse.value(200, 'Success', data_page)
+            paginate_data = paginate(data=res, total=total, page_num=param.current_page, page_size=param.page_size)
+            return CommonResponse.value(200, 'Success', paginate_data)
         else:
             return CommonResponse.value(500, 'Error', None)
 

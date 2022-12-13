@@ -67,6 +67,23 @@ async def get_news_detail(id: int, db: Session = Depends(get_db)):
     # file_url = '/web/content/tb_news/' + str(item.id) + '/file' if item.file else None
     return result
 
+
+async def get_apartments(id: int, db: Session = Depends(get_db)):
+    sql = text("select * "
+               "from tb_building_house "
+               "concat('" + get_settings().residential_server_url +
+               "', '/web/image?', 'model=tb_news&id=', id , '&field=image') as image_url, "
+               "concat('" + get_settings().residential_server_url +
+               "', '/web/content/tb_news/', id , '/file') as file_url, "
+               "create_date, write_date, expired_date "
+               "from tb_news where id = " + str(id))
+    result = [dict(row) for row in db.execute(sql)]
+    # image_url = '/web/image?' + 'model=tb_news&id=' + str(
+    #     item.id) + '&field=image' if item.image else None
+    # file_url = '/web/content/tb_news/' + str(item.id) + '/file' if item.file else None
+    return result
+
+
 async def read_notification(id: int, db: Session):
     sql = text("update tb_push_notification "
                "set notification_status = 'SEEN' "
@@ -76,14 +93,15 @@ async def read_notification(id: int, db: Session):
     return rs
 
 
-async def search_notification_page(id: int, param: common_dto.SearchPageInput, db: Session = Depends(get_db), ):
+async def search_notification_page(id: int, param: common_dto.SearchPageInput, db: Session = Depends(get_db),
+                                   page_num: int = 0, page_size: int = 10):
+    offset = count_offset(page_num, page_size)
     sql = text("select "
                "id, name, content, type, notification_status, create_date, write_date "
                "from tb_push_notification "
                "where user_id = " + str(id) + " "
                                               "order by id asc "
-                                              "limit " + str(param.page_size) + " offset " + str(
-        param.page_size * param.current_page))
+                                              f"limit {page_size} offset {offset}")
     result = [dict(row) for row in db.execute(sql)]
     return result
 
@@ -93,10 +111,17 @@ async def count_unread_notifications(id: int, db: Session = Depends(get_db), ):
                "count(*)"
                "from tb_push_notification "
                "where user_id = " + str(id) + " "
-               "and notification_status = 'SENT'")
+                                              "and notification_status = 'SENT'")
     result = db.execute(sql).fetchone()
     return result
 
+async def count_notifications(id: int, db: Session = Depends(get_db), ):
+    sql = text("select "
+               "count(*)"
+               "from tb_push_notification "
+               "where user_id = " + str(id))
+    result = db.execute(sql).fetchone()
+    return result.count
 
 async def search_banner_page(param: common_dto.SearchPageInput, db: Session = Depends(get_db)):
     sql = text("select "
