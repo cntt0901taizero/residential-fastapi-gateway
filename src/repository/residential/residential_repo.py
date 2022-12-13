@@ -67,23 +67,6 @@ async def get_news_detail(id: int, db: Session = Depends(get_db)):
     # file_url = '/web/content/tb_news/' + str(item.id) + '/file' if item.file else None
     return result
 
-
-async def get_apartments(id: int, db: Session = Depends(get_db)):
-    sql = text("select * "
-               "from tb_building_house "
-               "concat('" + get_settings().residential_server_url +
-               "', '/web/image?', 'model=tb_news&id=', id , '&field=image') as image_url, "
-               "concat('" + get_settings().residential_server_url +
-               "', '/web/content/tb_news/', id , '/file') as file_url, "
-               "create_date, write_date, expired_date "
-               "from tb_news where id = " + str(id))
-    result = [dict(row) for row in db.execute(sql)]
-    # image_url = '/web/image?' + 'model=tb_news&id=' + str(
-    #     item.id) + '&field=image' if item.image else None
-    # file_url = '/web/content/tb_news/' + str(item.id) + '/file' if item.file else None
-    return result
-
-
 async def read_notification(id: int, db: Session):
     sql = text("update tb_push_notification "
                "set notification_status = 'SEEN' "
