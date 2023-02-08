@@ -1,11 +1,11 @@
-from sqlalchemy.orm import Session
-from src import database
 from fastapi import Depends
 from sqlalchemy import text
+from sqlalchemy.orm import Session
+
 from config import get_settings
-from src.schemas.residential import common_dto
 from src.database import get_db
 from src.models.tb_users_blockhouse_model import UsersBlockhouse
+from src.schemas.residential import common_dto
 
 
 async def get_user_by_id(uid: int, db: Session = Depends(get_db)):
