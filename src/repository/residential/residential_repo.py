@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
-from src import database_odoo
+from src import database
 from fastapi import Depends
 from sqlalchemy import text
 from config import get_settings
 from src.schemas.residential import common_dto
-
-get_db = database_odoo.get_db
+from src.database import get_db
+from src.models.tb_users_blockhouse_model import UsersBlockhouse
 
 
 async def get_user_by_id(uid: int, db: Session = Depends(get_db)):
@@ -67,6 +67,7 @@ async def get_news_detail(id: int, db: Session = Depends(get_db)):
     # file_url = '/web/content/tb_news/' + str(item.id) + '/file' if item.file else None
     return result
 
+
 async def read_notification(id: int, db: Session):
     sql = text("update tb_push_notification "
                "set notification_status = 'SEEN' "
@@ -89,7 +90,7 @@ async def search_notification_page(id: int, param: common_dto.SearchPageInput, d
     return result
 
 
-async def count_unread_notifications(id: int, db: Session = Depends(get_db), ):
+async def count_unread_notifications(id: int, db: Session):
     sql = text("select "
                "count(*)"
                "from tb_push_notification "
@@ -98,6 +99,7 @@ async def count_unread_notifications(id: int, db: Session = Depends(get_db), ):
     result = db.execute(sql).fetchone()
     return result
 
+
 async def count_notifications(id: int, db: Session = Depends(get_db), ):
     sql = text("select "
                "count(*)"
@@ -105,6 +107,7 @@ async def count_notifications(id: int, db: Session = Depends(get_db), ):
                "where user_id = " + str(id))
     result = db.execute(sql).fetchone()
     return result.count
+
 
 async def search_banner_page(param: common_dto.SearchPageInput, db: Session = Depends(get_db)):
     sql = text("select "
@@ -117,3 +120,9 @@ async def search_banner_page(param: common_dto.SearchPageInput, db: Session = De
                "limit " + str(param.page_size) + " offset " + str(param.page_size * param.current_page))
     result = [dict(row) for row in db.execute(sql)]
     return result
+
+
+async def get_user_block_house(user_id, db: Session):
+    return db.query(UsersBlockhouse.blockhouse_id) \
+        .filter(UsersBlockhouse.user_id == user_id) \
+        .all()

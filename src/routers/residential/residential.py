@@ -1,27 +1,23 @@
-from typing import List
+from fastapi import APIRouter, Path, Security
+from fastapi import Depends, Request
+from sqlalchemy.orm import Session
+from starlette import status as http_status
 
-from src import database_odoo
+from src.database import get_db
 from src.repository.Paginate import paginate
+from src.repository.residential import residential_repo
 from src.routers.residential.userauth import check_auth
+from src.schemas.User import User
 from src.schemas.apartment import Apartment
 from src.schemas.resident import Resident
 from src.schemas.residential import common_dto, news_dto
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, Request
-from fastapi import APIRouter, Path, Query
-from starlette import status as http_status
-from src.repository.residential import residential_repo
 from src.schemas.residential.common_dto import CommonResponse
-from config import get_settings
-import requests
-import json
+from src.services import AuthService, UtilitiesService
 
 router = APIRouter(
     prefix="/residential",
     tags=['Residential API']
 )
-
-get_db = database_odoo.get_db
 
 
 @router.get("/apartments")
@@ -51,12 +47,12 @@ async def get_apartments():
     except Exception as e:
         return CommonResponse.value(500, e.args[0], None)
 
+
 @router.get(
     "/residents/{id}",
     response_model=Resident,
     status_code=http_status.HTTP_200_OK,
 )
-
 async def get_resident(id: int = Path(title="Room ID")):
     resident = Resident(
         id=id,
@@ -68,17 +64,21 @@ async def get_resident(id: int = Path(title="Room ID")):
         floor=3
     )
     return resident
+
+
 @router.post('/news/search-page')
 async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
     # check = await check_auth(request.sid)
     # if check.get('data') > 0:
-        res = await residential_repo.search_news_page(db,request.current_page,request.page_size)
-        total = await residential_repo.total(db)
-        # data = res.get('page_list_data')
-        paginate_data = paginate(data=res, total=total, page_num=request.current_page, page_size=request.page_size)
-        return CommonResponse.value(200, 'Success', paginate_data)
-    # else:
-    #     return CommonResponse.value(500, 'Error', None)
+    res = await residential_repo.search_news_page(db, request.current_page, request.page_size)
+    total = await residential_repo.total(db)
+    # data = res.get('page_list_data')
+    paginate_data = paginate(data=res, total=total, page_num=request.current_page, page_size=request.page_size)
+    return CommonResponse.value(200, 'Success', paginate_data)
+
+
+# else:
+#     return CommonResponse.value(500, 'Error', None)
 
 
 @router.post('/notification/search-page')
@@ -89,7 +89,7 @@ async def notification_search_page(param: common_dto.SearchPageInput,
         check = await check_auth(_sid)
         if check.get('data') > 0:
             res = await residential_repo.search_notification_page(check.get('data'), param, db)
-            total = await residential_repo.count_notifications(id=check.get('data'), db= db)
+            total = await residential_repo.count_notifications(id=check.get('data'), db=db)
             # data_page = {
             #     "page_list_data": res,
             #     "size": param.page_size,
@@ -160,4 +160,12 @@ async def banner_search_page(param: common_dto.SearchPageInput,
         return CommonResponse.value(500, e.args[0], None)
 
 
-
+@router.get('/utilities')
+async def list_apartment_utilities(params: common_dto.SearchPageInput,
+                                   user: User = Security(AuthService.auth_user),
+                                   db: Session = Depends(get_db)):
+    try:
+        res = await UtilitiesService.get_list(params, user, db)
+        return CommonResponse.value(200, 'Success', res)
+    except Exception as e:
+        return CommonResponse.value(500, e.args[0], None)

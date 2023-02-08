@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src import database_odoo
+from src import database
 from src.models.fcm_token_model import FcmToken
 from fastapi import Depends
 from sqlalchemy import text

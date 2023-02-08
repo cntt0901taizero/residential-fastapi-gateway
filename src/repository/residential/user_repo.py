@@ -1,11 +1,10 @@
-import base64
-
-from sqlalchemy.orm import Session
-from src import database_odoo
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy import text
+from sqlalchemy.orm import Session
+
 from config import get_settings
-from src.schemas.residential import common_dto
+from src.database import get_db
+from src.models.res_users_model import ResUsers
 
 
 async def get_user_by_id(uid: int, db: Session):
@@ -21,5 +20,8 @@ async def get_user_by_id(uid: int, db: Session):
     return result[0]
 
 
-
-
+async def get_user_detail(db: Session, user_id: int):
+    try:
+        return db.query(ResUsers).filter(ResUsers.id == user_id).first()
+    except Exception as e:
+        return False

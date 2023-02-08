@@ -1,22 +1,23 @@
-from src import database_odoo
-from src.repository.residential.fcm_token_repo import init_fcm_token, del_fcm_token
-from src.schemas.fastapi_dto import FcmToken
-from src.schemas.residential import userauth_dto
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, Request, Header
-from src.repository.residential import residential_repo, user_repo
-from src.schemas.residential.common_dto import CommonResponse
-from config import get_settings
-import requests
 import json
 
+import requests
+from fastapi import APIRouter, Depends, Request, Header, Security
+from sqlalchemy.orm import Session
+
+from config import get_settings
+from src.repository.residential import user_repo
+from src.repository.residential.fcm_token_repo import init_fcm_token, del_fcm_token
+from src.schemas.residential import userauth_dto
+from src.schemas.residential.common_dto import CommonResponse
+from src.database import get_db
+import src.services.UserService as UserService
+import src.services.AuthService as AuthService
+from src.schemas.User import ChangePassword, User
 
 router = APIRouter(
     prefix="/residential",
     tags=['Residential API']
 )
-
-get_db = database_odoo.get_db
 
 
 @router.post('/auth/login')
@@ -87,22 +88,14 @@ async def get_user(request: Request, db: Session = Depends(get_db)):
         return CommonResponse.value(500, e.args[0], None)
 
 
-# @router.post('/user/update')
-# async def update(param, request: Request, db: Session = Depends(get_db)):
-#     try:
-#         _sid = request.headers.get('sid')
-#         check = await check_auth(_sid)
-#         if check.get('data') > 0:
-#             res = await user_repo.get_user_by_id(check.get('data'), db)
-#             return CommonResponse.value(200, 'Success', res)
-#         else:
-#             return CommonResponse.value(500, 'Error', None)
-#
-#     except Exception as e:
-#         return CommonResponse.value(500, e.args[0], None)
-
-
-
-
-
-
+@router.post('/user/password')
+async def change_password(
+        data: ChangePassword,
+        user: User = Security(AuthService.auth_user),
+        sid: str = Header()
+):
+    try:
+        result = await UserService.change_password(data, sid)
+        return CommonResponse.value(200, 'Success', result)
+    except Exception as e:
+        return CommonResponse.value(500, 'Error', None)
