@@ -1,4 +1,12 @@
+from typing import Optional
+
 from pydantic import BaseModel
+
+
+class ResidentialLoginInput(BaseModel):
+    login: str
+    password: str
+    fcm_token: Optional[str] = None
 
 
 class User(BaseModel):

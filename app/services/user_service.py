@@ -1,7 +1,7 @@
 import requests
 import json
 
-from config import get_settings
+from configs import get_settings
 
 
 async def change_password(data, sid):

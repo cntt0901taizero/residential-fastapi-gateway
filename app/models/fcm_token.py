@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from src.database import Base
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
+
+from app.database import Base
 
 
 class FcmToken(Base):

@@ -4,15 +4,14 @@ import requests
 from fastapi import APIRouter, Depends, Request, Header, Security
 from sqlalchemy.orm import Session
 
-from config import get_settings
-from src.repository.residential import user_repo
-from src.repository.residential.fcm_token_repo import init_fcm_token, del_fcm_token
-from src.schemas.residential import userauth_dto
-from src.schemas.residential.common_dto import CommonResponse
-from src.database import get_db
-import src.services.UserService as UserService
-import src.services.AuthService as AuthService
-from src.schemas.User import ChangePassword, User
+import app.schemas as Schemas
+import app.services.auth_service as AuthService
+import app.services.user_service as UserService
+from configs import get_settings
+from app.database import get_db
+from app.repository import user_repo, token_repo
+
+from app.schemas.common import CommonResponse
 
 router = APIRouter(
     prefix="/residential",
@@ -21,7 +20,7 @@ router = APIRouter(
 
 
 @router.post('/auth/login')
-async def login(request: userauth_dto.ResidentialLoginInput, db: Session = Depends(get_db)):
+async def login(request: Schemas.ResidentialLoginInput, db: Session = Depends(get_db)):
     try:
         url = get_settings().residential_server_url + '/api/authenticate/login'
         headers = {'Content-type': 'application/json'}
@@ -41,7 +40,7 @@ async def login(request: userauth_dto.ResidentialLoginInput, db: Session = Depen
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
         data['data']['expires_time'] = str((header[1].split('='))[1])
-        await init_fcm_token(id=data['data']['id'], fcm_token=request.fcm_token, db=db)
+        await token_repo.init_fcm_token(id=data['data']['id'], fcm_token=request.fcm_token, db=db)
         return data
 
     except Exception as e:
@@ -57,7 +56,7 @@ async def logout(fcm_token: str, request: Request, db: Session = Depends(get_db)
         headers = {'Content-type': 'application/json', 'X-Openerp': _sid}
         json_obj = {}
         rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
-        await del_fcm_token(id=rs.get('data'), fcm_token=fcm_token, db=db)
+        await token_repo.del_fcm_token(id=rs.get('data'), fcm_token=fcm_token, db=db)
         return json.loads(rs.text)
 
     except Exception as e:
@@ -90,8 +89,8 @@ async def get_user(request: Request, db: Session = Depends(get_db)):
 
 @router.post('/user/password')
 async def change_password(
-        data: ChangePassword,
-        user: User = Security(AuthService.auth_user),
+        data: Schemas.ChangePassword,
+        user: Schemas.User = Security(AuthService.auth_user, scopes=["ADMIN_VIEW"]),
         sid: str = Header()
 ):
     try:

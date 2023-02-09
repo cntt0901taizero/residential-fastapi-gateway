@@ -3,16 +3,16 @@ from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 from starlette import status as http_status
 
-from src.database import get_db
-from src.repository.Paginate import paginate
-from src.repository.residential import residential_repo
-from src.routers.residential.userauth import check_auth
-from src.schemas.User import User
-from src.schemas.apartment import Apartment
-from src.schemas.resident import Resident
-from src.schemas.residential import common_dto, news_dto
-from src.schemas.residential.common_dto import CommonResponse
-from src.services import AuthService, UtilitiesService
+from app.database import get_db
+from app.repository.paginate_repo import paginate
+from app.repository import residential_repo
+from app.routers.userauth import check_auth
+from app.schemas.user import User
+from app.schemas.apartment import Apartment
+from app.schemas.resident import Resident
+from app.schemas.common import CommonResponse
+from app.services import auth_service, utilities_service
+import app.schemas as Schemas
 
 router = APIRouter(
     prefix="/residential",
@@ -67,22 +67,15 @@ async def get_resident(id: int = Path(title="Room ID")):
 
 
 @router.post('/news/search-page')
-async def news_search_page(request: news_dto.NewsSearchPageInput, db: Session = Depends(get_db)):
-    # check = await check_auth(request.sid)
-    # if check.get('data') > 0:
+async def news_search_page(request: Schemas.NewsSearchPageInput, db: Session = Depends(get_db)):
     res = await residential_repo.search_news_page(db, request.current_page, request.page_size)
     total = await residential_repo.total(db)
-    # data = res.get('page_list_data')
     paginate_data = paginate(data=res, total=total, page_num=request.current_page, page_size=request.page_size)
     return CommonResponse.value(200, 'Success', paginate_data)
 
 
-# else:
-#     return CommonResponse.value(500, 'Error', None)
-
-
 @router.post('/notification/search-page')
-async def notification_search_page(param: common_dto.SearchPageInput,
+async def notification_search_page(param: Schemas.SearchPageInput,
                                    request: Request, db: Session = Depends(get_db)):
     try:
         _sid = request.headers.get('sid')
@@ -90,14 +83,6 @@ async def notification_search_page(param: common_dto.SearchPageInput,
         if check.get('data') > 0:
             res = await residential_repo.search_notification_page(check.get('data'), param, db)
             total = await residential_repo.count_notifications(id=check.get('data'), db=db)
-            # data_page = {
-            #     "page_list_data": res,
-            #     "size": param.page_size,
-            #     "total_pages": "",
-            #     "total_items": "",
-            #     "current_page": param.current_page if param.current_page > 0 else 0,
-            # }
-            # return CommonResponse.value(200, 'Success', data_page)
             paginate_data = paginate(data=res, total=total, page_num=param.current_page, page_size=param.page_size)
             return CommonResponse.value(200, 'Success', paginate_data)
         else:
@@ -138,7 +123,7 @@ async def total_unread_notifications(request: Request, db: Session = Depends(get
 
 
 @router.post('/banner/search-page')
-async def banner_search_page(param: common_dto.SearchPageInput,
+async def banner_search_page(param: Schemas.SearchPageInput,
                              request: Request, db: Session = Depends(get_db)):
     try:
         _sid = request.headers.get('sid')
@@ -160,12 +145,15 @@ async def banner_search_page(param: common_dto.SearchPageInput,
         return CommonResponse.value(500, e.args[0], None)
 
 
-@router.get('/utilities')
-async def list_apartment_utilities(params: common_dto.SearchPageInput,
-                                   user: User = Security(AuthService.auth_user),
+@router.get(
+    '/utilities',
+    summary="List apartment utilities"
+)
+async def list_apartment_utilities(request: Schemas.SearchPageInput,
+                                   user: User = Security(auth_service.auth_user),
                                    db: Session = Depends(get_db)):
     try:
-        res = await UtilitiesService.get_list(params, user, db)
+        res = await utilities_service.get_list(request, user, db)
         return CommonResponse.value(200, 'Success', res)
     except Exception as e:
         return CommonResponse.value(500, e.args[0], None)

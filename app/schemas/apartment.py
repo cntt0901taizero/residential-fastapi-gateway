@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from src.schemas.resident import Resident
+from app.schemas.resident import Resident
 
 
 class Apartment(BaseModel):

@@ -1,12 +1,11 @@
-from fastapi import Header, HTTPException, Depends
-from sqlalchemy.orm import Session
-
-from config import get_settings
-import requests
 import json
-from src.database import get_db
-
-from src.repository.residential import user_repo
+import requests
+from fastapi import Header, HTTPException, Depends
+from fastapi.security import SecurityScopes
+from sqlalchemy.orm import Session
+from configs import get_settings
+from app.database import get_db
+from app.repository import user_repo
 
 
 async def get_login_data(sid: str):
@@ -18,7 +17,11 @@ async def get_login_data(sid: str):
     return json.loads(rs.text)
 
 
-async def auth_user(sid: str = Header(), db: Session = Depends(get_db)):
+async def auth_user(
+        security_scopes: SecurityScopes,
+        sid: str = Header(),
+        db: Session = Depends(get_db)
+):
     if not sid:
         raise HTTPException(status_code=400, detail="sid header invalid")
     login_data = await get_login_data(sid)

@@ -1,10 +1,8 @@
-from fastapi import Depends, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from config import get_settings
-from src.database import get_db
-from src.models.res_users_model import ResUsers
+from configs import get_settings
+from app.models.res_users import Users
 
 
 async def get_user_by_id(uid: int, db: Session):
@@ -16,12 +14,11 @@ async def get_user_by_id(uid: int, db: Session):
                "from res_users inner join res_partner on res_users.partner_id = res_partner.id "
                "where res_users.id = " + str(uid))
     result = [dict(row) for row in db.execute(sql)]
-    # result = (db.execute(sql)).fetchall()
     return result[0]
 
 
 async def get_user_detail(db: Session, user_id: int):
     try:
-        return db.query(ResUsers).filter(ResUsers.id == user_id).first()
+        return db.query(Users).filter(Users.id == user_id).first()
     except Exception as e:
         return False

@@ -2,19 +2,17 @@ from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from config import get_settings
-from src.database import get_db
-from src.models.tb_users_blockhouse_model import UsersBlockhouse
-from src.schemas.residential import common_dto
+from configs import get_settings
+from app.database import get_db
+from app.models import UsersBlockhouse, ApartmentUtilities
+import app.schemas as Schemas
 
 
 async def get_user_by_id(uid: int, db: Session = Depends(get_db)):
     sql = text("select id, active, login, company_id, partner_id, "
                "create_date, signature, notification_type, phone_number "
                "from res_users where id = " + str(uid))
-    # result = (db.execute(sql)).fetchall()
     result = [dict(row) for row in db.execute(sql)]
-    # result[0]['password'] = ''
     return result
 
 
@@ -77,7 +75,7 @@ async def read_notification(id: int, db: Session):
     return rs
 
 
-async def search_notification_page(id: int, param: common_dto.SearchPageInput, db: Session = Depends(get_db),
+async def search_notification_page(id: int, param: Schemas.SearchPageInput, db: Session = Depends(get_db),
                                    page_num: int = 0, page_size: int = 10):
     offset = count_offset(page_num, page_size)
     sql = text("select "
@@ -109,7 +107,7 @@ async def count_notifications(id: int, db: Session = Depends(get_db), ):
     return result.count
 
 
-async def search_banner_page(param: common_dto.SearchPageInput, db: Session = Depends(get_db)):
+async def search_banner_page(param: Schemas.SearchPageInput, db: Session = Depends(get_db)):
     sql = text("select "
                "id, name, banner_description, "
                "concat('" + get_settings().residential_server_url +
@@ -123,6 +121,16 @@ async def search_banner_page(param: common_dto.SearchPageInput, db: Session = De
 
 
 async def get_user_block_house(user_id, db: Session):
+    db: Session = get_db()
     return db.query(UsersBlockhouse.blockhouse_id) \
         .filter(UsersBlockhouse.user_id == user_id) \
         .all()
+
+
+async def get_utilities_by_block_house_ids(block_house_ids, db: Session):
+    query = db.query(ApartmentUtilities) \
+        .filter(ApartmentUtilities.blockhouse_id.in_(block_house_ids)) \
+        .filter(ApartmentUtilities.is_active.is_(True)) \
+        .order_by(ApartmentUtilities.create_date.desc())
+
+    return query.all(), query.count()

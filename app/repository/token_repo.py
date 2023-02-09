@@ -1,7 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from src.models.fcm_token_model import FcmToken
+from app.models.fcm_token import FcmToken
 
 
 async def init_fcm_token(id: int, fcm_token: str, db: Session):

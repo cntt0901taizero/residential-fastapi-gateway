@@ -1,4 +1,4 @@
-from src.schemas.Paginator import Paginator
+from app.schemas.paginator import Paginator
 
 
 def paginate(data, page_num, page_size, total) -> Paginator:

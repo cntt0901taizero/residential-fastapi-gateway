@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Date
-from src.database import Base
+from app.database import Base
 
 
 class UsersBlockhouse(Base):
