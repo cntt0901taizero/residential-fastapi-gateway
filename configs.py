@@ -25,7 +25,6 @@ def get_settings() -> Settings:
     return Settings()
 
 
-settings = get_settings()
+_db = get_settings()
 
-DB_URL = f"postgresql+psycopg2://{settings.db_user}:{settings.db_password}" \
-         f"@{settings.db_host}:{settings.db_port}/{settings.db_name}"
+DB_URL = f"postgresql+psycopg2://{_db.db_user}:{_db.db_password}@{_db.db_host}:{_db.db_port}/{_db.db_name}"
