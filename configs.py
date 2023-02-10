@@ -5,15 +5,15 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    residential_server_url: str = os.getenv('RESIDENTIAL_SERVER_URL')
-    uvicorn_host: str = os.getenv('UVICORN_HOST')
-    uvicorn_port: str = os.getenv('UVICORN_PORT')
+    residential_server_url: str = "http://157.245.62.74:8069"
+    uvicorn_host: str = "157.245.62.74"
+    uvicorn_port: str = "8081"
 
-    db_host: str = os.getenv("DB_HOST")
-    db_port: str = os.getenv("DB_PORT")
-    db_user: str = os.getenv("DB_USER")
-    db_password: str = os.getenv("DB_PASSWORD")
-    db_name: str = os.getenv("DB_NAME")
+    db_host: str = "157.245.62.74"
+    db_port: str = "5432"
+    db_user: str = "adminapp"
+    db_password: str = "adminapp2022"
+    db_name: str = "odoo_db"
     db_echo: bool = False
 
     class Config:
@@ -25,6 +25,7 @@ def get_settings() -> Settings:
     return Settings()
 
 
-_db = get_settings()
+settings = get_settings()
 
-DB_URL = f"postgresql+psycopg2://{_db.db_user}:{_db.db_password}@{_db.db_host}:{_db.db_port}/{_db.db_name}"
+DB_URL = f"postgresql+psycopg2://{settings.db_user}:{settings.db_password}" \
+         f"@{settings.db_host}:{settings.db_port}/{settings.db_name}"
