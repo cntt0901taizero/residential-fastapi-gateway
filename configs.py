@@ -7,7 +7,7 @@ from pydantic import BaseSettings
 class Settings(BaseSettings):
     residential_server_url: str = os.getenv('RESIDENTIAL_SERVER_URL')
     uvicorn_host: str = os.getenv('UVICORN_HOST')
-    uvicorn_port: str = os.getenv('UVICORN_PORT')
+    uvicorn_port: int = os.getenv('UVICORN_PORT')
 
     db_host: str = os.getenv("DB_HOST")
     db_port: str = os.getenv("DB_PORT")
