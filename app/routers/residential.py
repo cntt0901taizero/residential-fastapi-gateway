@@ -153,7 +153,7 @@ async def list_apartment_utilities(request: Schemas.SearchPageInput,
                                    user: User = Security(auth_service.auth_user),
                                    db: Session = Depends(get_db)):
     try:
-        res = await utilities_service.get_list(request, user, db)
+        res = await utilities_service.get_list(db, request, user)
         return CommonResponse.value(200, 'Success', res)
     except Exception as e:
         return CommonResponse.value(500, e.args[0], None)

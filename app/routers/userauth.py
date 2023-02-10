@@ -90,7 +90,7 @@ async def get_user(request: Request, db: Session = Depends(get_db)):
 @router.post('/user/password')
 async def change_password(
         data: Schemas.ChangePassword,
-        user: Schemas.User = Security(AuthService.auth_user, scopes=["ADMIN_VIEW"]),
+        user: Schemas.User = Security(AuthService.auth_user),
         sid: str = Header()
 ):
     try:

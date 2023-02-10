@@ -12,8 +12,8 @@ class SearchPageInput(BaseModel):
 
 
 class PageOutput(BaseModel):
-    page_list_data: Optional[List] = []
-    size: Optional[int] = 10
+    list_data: Optional[List] = []
+    page_size: Optional[int] = 10
     total_pages: Optional[int] = 0
     total_items: Optional[int] = 0
     current_page: Optional[int] = 0
@@ -25,13 +25,12 @@ class CommonResponseOutputDto(BaseModel):
     data: Any = None
 
 
+class Paging(BaseModel):
+    limit: Optional[int] = 10
+    offset: Optional[int] = 0
+
+
 class CommonResponse:
     @staticmethod
     def value(status: int, message: '', data: None):
         return CommonResponseOutputDto(status=status, message=message, data=data)
-
-
-
-
-
-

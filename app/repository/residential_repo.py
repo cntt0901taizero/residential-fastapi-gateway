@@ -121,16 +121,16 @@ async def search_banner_page(param: Schemas.SearchPageInput, db: Session = Depen
 
 
 async def get_user_block_house(user_id, db: Session):
-    db: Session = get_db()
     return db.query(UsersBlockhouse.blockhouse_id) \
         .filter(UsersBlockhouse.user_id == user_id) \
         .all()
 
 
-async def get_utilities_by_block_house_ids(block_house_ids, db: Session):
+async def get_utilities_by_block_house_ids(db: Session, block_house_ids, paging: Schemas.Paging):
     query = db.query(ApartmentUtilities) \
         .filter(ApartmentUtilities.blockhouse_id.in_(block_house_ids)) \
         .filter(ApartmentUtilities.is_active.is_(True)) \
         .order_by(ApartmentUtilities.create_date.desc())
-
-    return query.all(), query.count()
+    total_item = query.count()
+    data = query.limit(paging.limit).offset(paging.offset).all()
+    return data, total_item
