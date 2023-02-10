@@ -14,6 +14,7 @@ app.include_router(residential.router)
 
 BASE_DIR: str = str(Path(__file__).resolve().parent.parent)
 
+
 @app.on_event("startup")
 async def startup_event():
     logger = logging.getLogger("uvicorn.access")
