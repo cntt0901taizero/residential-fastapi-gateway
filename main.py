@@ -20,4 +20,4 @@ async def startup_event():
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host=get_settings().uvicorn_host, port=get_settings().uvicorn_port)
+    uvicorn.run(app, host=get_settings().uvicorn_host, port=int(get_settings().uvicorn_port))
