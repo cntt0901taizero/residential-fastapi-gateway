@@ -1,5 +1,4 @@
 .idea
 __pycache__
 logs_file.log
-venv
 logs/*
