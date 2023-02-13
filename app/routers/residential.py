@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Path, Security
+from fastapi import APIRouter, Path, Security, UploadFile, Form
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 from starlette import status as http_status
@@ -11,7 +11,7 @@ from app.schemas.user import User
 from app.schemas.apartment import Apartment
 from app.schemas.resident import Resident
 from app.schemas.common import CommonResponse
-from app.services import auth_service, utilities_service
+from app.services import auth_service, utilities_service, complain_service
 import app.schemas as Schemas
 
 router = APIRouter(
@@ -157,3 +157,26 @@ async def list_apartment_utilities(request: Schemas.SearchPageInput,
         return CommonResponse.value(200, 'Success', res)
     except Exception as e:
         return CommonResponse.value(500, e.args[0], None)
+
+
+@router.post(
+    '/complain',
+    summary="Create residential complain"
+)
+async def create_claim(image: UploadFile,
+                       name: str = Form(),
+                       content: str = Form(),
+                       blockhouse_id : int = Form(),
+                       building_id: int = Form(),
+                       user: User = Security(auth_service.auth_user),
+                       db: Session = Depends(get_db)):
+    try:
+        data = dict(name=name,
+                    content=content,
+                    blockhouse_id=blockhouse_id,
+                    building_id=building_id,
+                    image=image)
+        res = await complain_service.add(db, data , user)
+        return CommonResponse.value(200, 'Success', res)
+    except Exception as e:
+        return CommonResponse.value(500, 'error', None)
