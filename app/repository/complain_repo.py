@@ -20,3 +20,16 @@ async def add_new_complain(db: Session, data, user):
         return complain
     except Exception as e:
         return e
+
+
+async def get_list(db: Session, filter_data, paging, user):
+    try:
+        query = db.query(Complain) \
+            .filter(Complain.status == filter_data.get('status')) \
+            .filter(Complain.user_id == user.id) \
+            .order_by(Complain.create_date.desc())
+        total = query.count()
+        data = query.limit(paging.limit).offset(paging.offset).all()
+        return data, total
+    except Exception as e:
+        return e

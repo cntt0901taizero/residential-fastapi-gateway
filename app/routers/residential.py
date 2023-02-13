@@ -166,7 +166,7 @@ async def list_apartment_utilities(request: Schemas.SearchPageInput,
 async def create_claim(image: UploadFile,
                        name: str = Form(),
                        content: str = Form(),
-                       blockhouse_id : int = Form(),
+                       blockhouse_id: int = Form(),
                        building_id: int = Form(),
                        user: User = Security(auth_service.auth_user),
                        db: Session = Depends(get_db)):
@@ -176,7 +176,26 @@ async def create_claim(image: UploadFile,
                     blockhouse_id=blockhouse_id,
                     building_id=building_id,
                     image=image)
-        res = await complain_service.add(db, data , user)
+        res = await complain_service.add(db, data, user)
+        return CommonResponse.value(200, 'Success', res)
+    except Exception as e:
+        return CommonResponse.value(500, 'error', None)
+
+
+@router.get(
+    '/complain',
+    summary="List residential complain"
+)
+async def get_claim(status: str,
+                    current_page: int,
+                    page_size: int,
+                    user: User = Security(auth_service.auth_user),
+                    db: Session = Depends(get_db)):
+    try:
+        data = dict(status=status,
+                    current_page=current_page,
+                    page_size=page_size)
+        res = await complain_service.get_list(db, data, user)
         return CommonResponse.value(200, 'Success', res)
     except Exception as e:
         return CommonResponse.value(500, 'error', None)
