@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
+from pydantic.schema import datetime
 
 
 class ResidentialLoginInput(BaseModel):
@@ -11,10 +12,12 @@ class ResidentialLoginInput(BaseModel):
 
 class User(BaseModel):
     id: int
-    sid: str
-    email: str
-    phone: str
-    display_name: str
+    login: str
+    phone_number: Optional[str]
+    user_type: Optional[str]
+    gender: Optional[str]
+    blockhouse_ids: Optional[List[int]]
+    building_ids: Optional[List[int]]
 
 
 class ChangePassword(BaseModel):
