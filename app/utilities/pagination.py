@@ -22,3 +22,13 @@ def get_paging_config(config: SearchPageInput):
         limit=config.page_size,
         offset=offset
     )
+
+
+def paging_config(current_page: int = 1, page_size: int = 10):
+    page = current_page - 1 if current_page - 1 > 0 else 0
+    offset = page * page_size
+
+    return Paging(
+        limit=page_size,
+        offset=offset
+    )

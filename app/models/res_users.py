@@ -22,7 +22,6 @@ class Users(Base):
     notification_type = Column(String)
     odoobot_state = Column(String)
     odoobot_failed = Column(Boolean)
-    phone_number = Column(String)
     citizen_identification = Column(String)
     date_of_birth = Column(Date)
     gender = Column(String)
