@@ -5,3 +5,7 @@ from .paginator import *
 from .resident import *
 from .user import *
 from .utilities import *
+from blockhouse import *
+from register_delivery import *
+from building_house import *
+from building import *

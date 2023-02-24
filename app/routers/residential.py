@@ -145,6 +145,7 @@ async def banner_search_page(param: Schemas.SearchPageInput,
         return CommonResponse.value(500, e.args[0], None)
 
 
+
 @router.get(
     '/utilities',
     summary="List apartment utilities"
