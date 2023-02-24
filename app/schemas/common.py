@@ -26,7 +26,7 @@ class CommonResponseOutputDto(BaseModel):
 
 
 class Paging(BaseModel):
-    limit: Optional[int] = 11
+    limit: Optional[int] = 10
     offset: Optional[int] = 0
 
 
