@@ -11,7 +11,7 @@ from app.schemas.user import User
 from app.schemas.apartment import Apartment
 from app.schemas.resident import Resident
 from app.schemas.common import CommonResponse
-from app.services import auth_service, utilities_service, complain_service, news_service
+from app.services import auth_service, utilities_service, complain_service, news_service, banner_service
 from app.utilities.pagination import paging_config
 
 import app.schemas as Schemas
@@ -124,29 +124,6 @@ async def total_unread_notifications(request: Request, db: Session = Depends(get
         return CommonResponse.value(500, e.args[0], None)
 
 
-@router.post('/banner/search-page')
-async def banner_search_page(param: Schemas.SearchPageInput,
-                             request: Request, db: Session = Depends(get_db)):
-    try:
-        _sid = request.headers.get('sid')
-        check = await check_auth(_sid)
-        if check.get('data') > 0:
-            res = await residential_repo.search_banner_page(param, db)
-            data_page = {
-                "page_list_data": res,
-                "size": param.page_size,
-                "total_pages": "",
-                "total_items": "",
-                "current_page": param.current_page if param.current_page > 0 else 0,
-            }
-            return CommonResponse.value(200, 'Success', data_page)
-        else:
-            return CommonResponse.value(500, 'Error', None)
-
-    except Exception as e:
-        return CommonResponse.value(500, e.args[0], None)
-
-
 @router.get(
     '/utilities',
     summary="List apartment utilities"
@@ -220,6 +197,24 @@ async def list_news(
     try:
         page_config = paging_config(current_page, page_size)
         data = await news_service.get_list(db, page_config)
+
+        return CommonResponse.value(200, 'Success', data)
+    except Exception as e:
+        return CommonResponse.value(500, 'error', None)
+
+
+@router.get(
+    '/banners',
+    summary="List residential banners"
+)
+async def list_banner(
+        current_page: int,
+        page_size: int,
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
+    try:
+        data = await banner_service.get_list(db, current_page, page_size, user)
 
         return CommonResponse.value(200, 'Success', data)
     except Exception as e:
