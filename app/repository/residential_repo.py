@@ -107,19 +107,6 @@ async def count_notifications(id: int, db: Session = Depends(get_db), ):
     return result.count
 
 
-async def search_banner_page(param: Schemas.SearchPageInput, db: Session = Depends(get_db)):
-    sql = text("select "
-               "id, name, banner_description, "
-               "concat('" + get_settings().residential_server_url +
-               "', '/web/image?', 'model=tb_news&id=', id , '&field=image') as image_url, "
-               "create_date, write_date "
-               "from tb_banner "
-               "order by create_date asc "
-               "limit " + str(param.page_size) + " offset " + str(param.page_size * param.current_page))
-    result = [dict(row) for row in db.execute(sql)]
-    return result
-
-
 async def get_user_block_house(user_id, db: Session):
     return db.query(UsersBlockhouse.blockhouse_id) \
         .filter(UsersBlockhouse.user_id == user_id) \
