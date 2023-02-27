@@ -30,8 +30,6 @@ class Paging(BaseModel):
     offset: Optional[int] = 0
 
 
-
-
 class CommonResponse:
     @staticmethod
     def value(status: int, message: '', data: None):
