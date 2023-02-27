@@ -11,7 +11,9 @@ from app.schemas.user import User
 from app.schemas.apartment import Apartment
 from app.schemas.resident import Resident
 from app.schemas.common import CommonResponse
-from app.services import auth_service, utilities_service, complain_service
+from app.services import auth_service, utilities_service, complain_service, news_service
+from app.utilities.pagination import paging_config
+
 import app.schemas as Schemas
 
 router = APIRouter(
@@ -149,9 +151,11 @@ async def banner_search_page(param: Schemas.SearchPageInput,
     '/utilities',
     summary="List apartment utilities"
 )
-async def list_apartment_utilities(request: Schemas.SearchPageInput,
-                                   user: User = Security(auth_service.auth_user),
-                                   db: Session = Depends(get_db)):
+async def list_apartment_utilities(
+        request: Schemas.SearchPageInput,
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
     try:
         res = await utilities_service.get_list(db, request, user)
         return CommonResponse.value(200, 'Success', res)
@@ -163,13 +167,15 @@ async def list_apartment_utilities(request: Schemas.SearchPageInput,
     '/complain',
     summary="Create residential complain"
 )
-async def create_claim(image: UploadFile,
-                       name: str = Form(),
-                       content: str = Form(),
-                       blockhouse_id: int = Form(),
-                       building_id: int = Form(),
-                       user: User = Security(auth_service.auth_user),
-                       db: Session = Depends(get_db)):
+async def create_claim(
+        image: UploadFile,
+        name: str = Form(),
+        content: str = Form(),
+        blockhouse_id: int = Form(),
+        building_id: int = Form(),
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
     try:
         data = dict(name=name,
                     content=content,
@@ -197,5 +203,24 @@ async def get_claim(status: str,
                     page_size=page_size)
         res = await complain_service.get_list(db, data, user)
         return CommonResponse.value(200, 'Success', res)
+    except Exception as e:
+        return CommonResponse.value(500, 'error', None)
+
+
+@router.get(
+    '/news',
+    summary="List residential news"
+)
+async def list_news(
+        current_page: int,
+        page_size: int,
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
+    try:
+        page_config = paging_config(current_page, page_size)
+        data = await news_service.get_list(db, page_config)
+
+        return CommonResponse.value(200, 'Success', data)
     except Exception as e:
         return CommonResponse.value(500, 'error', None)
