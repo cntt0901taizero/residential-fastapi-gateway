@@ -10,6 +10,7 @@ class ResidentHandbook(Base):
     description = Column(String)
     detail_description = Column(String)
     is_active = Column(Boolean)
+    status = Column(String)
     blockhouse_id = Column(Integer)
     building_id = Column(Integer)
     create_uid = Column(Integer)

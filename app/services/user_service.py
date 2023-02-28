@@ -1,6 +1,10 @@
 import requests
 import json
 
+from sqlalchemy.orm import Session
+
+from app.repository import user_repo
+from app.schemas import FullInfoUser
 from configs import get_settings
 
 
@@ -9,13 +13,25 @@ async def change_password(data, sid):
     cookies = {'session_id': sid}
     headers = {'Content-type': 'application/json', 'X-Openerp': sid}
     json_obj = {
-            "jsonrpc": "2.0",
-            "params": {
-                "old": data.old_password,
-                "new1": data.new_password,
-                "new2": data.confirm_password,
+        "jsonrpc": "2.0",
+        "params": {
+            "old": data.old_password,
+            "new1": data.new_password,
+            "new2": data.confirm_password,
 
-            }
         }
+    }
     rs = requests.post(url=auth_url, json=json_obj, cookies=cookies, headers=headers)
     return json.loads(rs.text)
+
+
+async def get_detail_user(db: Session, user_id):
+    try:
+        user_detail = await user_repo.get_full_info(db, user_id)
+        user_detail = FullInfoUser.from_orm(user_detail).dict()
+
+        user_block_house = await user_repo.get_user_blockhouse(db, user_id)
+        user_detail['block_house'] = user_block_house
+        return user_detail
+    except Exception as e:
+        return e

@@ -5,3 +5,8 @@ from .tb_apartment_utilities import ApartmentUtilities
 from .tb_users_blockhouse import UsersBlockhouse
 from .tb_complain import Complain
 from .tb_resident_handbook import ResidentHandbook
+from .tb_blockhouse import Blockhouse
+from .tb_building_house import BuildingHouse
+from .tb_register_delivery import RegisterDelivery
+from .tb_building import Building
+from .res_partner import Partner

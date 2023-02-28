@@ -2,6 +2,7 @@ from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.constants.common import HanbookStatus
 from configs import get_settings
 from app.database import get_db
 from app.models import UsersBlockhouse, ApartmentUtilities, ResidentHandbook
@@ -127,6 +128,7 @@ async def get_handbooks_by_block_house_ids(db: Session, block_house_ids, paging:
     query = db.query(ResidentHandbook) \
         .filter(ResidentHandbook.blockhouse_id.in_(block_house_ids)) \
         .filter(ResidentHandbook.is_active.is_(True)) \
+        .filter(ResidentHandbook.status == HanbookStatus.ACTIVE.name) \
         .order_by(ResidentHandbook.create_date.desc())
     total_item = query.count()
     data = query.limit(paging.limit).offset(paging.offset).all()

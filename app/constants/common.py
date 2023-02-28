@@ -16,3 +16,9 @@ class NewsStatus(Enum):
 class BannerStatus(Enum):
     PENDING = "Pending"
     ACTIVE = "active"
+
+
+class HanbookStatus(Enum):
+    PENDING = 'pending'
+    ACTIVE = 'active'
+    REJECT = 'reject'

@@ -2,7 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from configs import get_settings
-from app.models.res_users import Users
+from app.models import Users, UsersBlockhouse, BuildingHouse, Blockhouse, Building, Partner
 
 
 async def get_user_by_id(uid: int, db: Session):
@@ -22,3 +22,52 @@ async def get_user_detail(db: Session, user_id: int):
         return db.query(Users).filter(Users.id == user_id).first()
     except Exception as e:
         return False
+
+
+async def get_full_info(db: Session, user_id):
+    try:
+        return db.query(
+            Users.id,
+            Users.user_type,
+            Users.create_date,
+            Users.gender,
+            Users.citizen_identification,
+            Partner.phone,
+            Partner.display_name,
+            Partner.email
+
+        ) \
+            .join(Partner, Partner.id == Users.partner_id) \
+            .filter(Users.id == user_id) \
+            .first()
+    except Exception as e:
+        return e
+
+
+async def get_user_blockhouse(db: Session, user_id: int):
+    try:
+        return db.query(
+            UsersBlockhouse.user_id.label("user_id"),
+            UsersBlockhouse.owner.label('is_owner'),
+            UsersBlockhouse.relationship_type.label('relationship_type'),
+
+            Blockhouse.id.label("blockhouse_id"),
+            Blockhouse.name.label("blockhouse_name"),
+            Blockhouse.code.label("blockhouse_code"),
+            Blockhouse.address.label("blockhouse_address"),
+
+            Building.name.label('building_name'),
+            Building.code.label('building_code'),
+
+            BuildingHouse.id.label("house_id"),
+            BuildingHouse.name.label("house_name"),
+            BuildingHouse.code.label("house_code"),
+        ) \
+            .join(Blockhouse, Blockhouse.id == UsersBlockhouse.blockhouse_id) \
+            .join(Building, Building.id == UsersBlockhouse.building_id) \
+            .join(BuildingHouse, BuildingHouse.id == UsersBlockhouse.building_house_id) \
+            .filter(UsersBlockhouse.user_id == user_id) \
+            .all()
+
+    except Exception as e:
+        return e

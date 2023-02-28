@@ -7,10 +7,11 @@ from sqlalchemy.orm import Session
 import app.schemas as Schemas
 import app.services.auth_service as AuthService
 import app.services.user_service as UserService
+from app.services import auth_service, user_service
 from configs import get_settings
 from app.database import get_db
 from app.repository import user_repo, token_repo
-
+from app.schemas.user import User
 from app.schemas.common import CommonResponse
 
 router = APIRouter(
@@ -98,3 +99,16 @@ async def change_password(
         return CommonResponse.value(200, 'Success', result)
     except Exception as e:
         return CommonResponse.value(500, 'Error', None)
+
+
+@router.get('/user')
+async def get_user(
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
+    try:
+        result = await user_service.get_detail_user(db, user.id)
+        return CommonResponse.value(200, 'Success', result)
+
+    except Exception as e:
+        return CommonResponse.value(500, e.args[0], None)
