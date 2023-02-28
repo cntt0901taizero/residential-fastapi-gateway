@@ -10,7 +10,7 @@ from app.routers.userauth import check_auth
 from app.schemas.user import User
 from app.schemas.apartment import Apartment
 from app.schemas.resident import Resident
-from app.schemas.common import CommonResponse
+from app.schemas.common import CommonResponse, SearchPageInput
 from app.services import auth_service, utilities_service, complain_service, news_service, banner_service
 from app.utilities.pagination import paging_config
 
@@ -129,12 +129,14 @@ async def total_unread_notifications(request: Request, db: Session = Depends(get
     summary="List apartment utilities"
 )
 async def list_apartment_utilities(
-        request: Schemas.SearchPageInput,
+        current_page: int,
+        page_size: int,
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
 ):
     try:
-        res = await utilities_service.get_list(db, request, user)
+        params = SearchPageInput(current_page=current_page, page_size=page_size)
+        res = await utilities_service.get_list(db, params, user)
         return CommonResponse.value(200, 'Success', res)
     except Exception as e:
         return CommonResponse.value(500, e.args[0], None)
