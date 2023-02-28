@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from configs import get_settings
 from app.database import get_db
-from app.models import UsersBlockhouse, ApartmentUtilities
+from app.models import UsersBlockhouse, ApartmentUtilities, ResidentHandbook
 import app.schemas as Schemas
 
 
@@ -118,6 +118,16 @@ async def get_utilities_by_block_house_ids(db: Session, block_house_ids, paging:
         .filter(ApartmentUtilities.blockhouse_id.in_(block_house_ids)) \
         .filter(ApartmentUtilities.is_active.is_(True)) \
         .order_by(ApartmentUtilities.create_date.desc())
+    total_item = query.count()
+    data = query.limit(paging.limit).offset(paging.offset).all()
+    return data, total_item
+
+
+async def get_handbooks_by_block_house_ids(db: Session, block_house_ids, paging: Schemas.Paging):
+    query = db.query(ResidentHandbook) \
+        .filter(ResidentHandbook.blockhouse_id.in_(block_house_ids)) \
+        .filter(ResidentHandbook.is_active.is_(True)) \
+        .order_by(ResidentHandbook.create_date.desc())
     total_item = query.count()
     data = query.limit(paging.limit).offset(paging.offset).all()
     return data, total_item
