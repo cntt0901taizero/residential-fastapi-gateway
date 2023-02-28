@@ -1,7 +1,9 @@
 import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+
+import configs
 
 
 class ResidentialLoginInput(BaseModel):
@@ -35,6 +37,9 @@ class FullInfoUser(BaseModel):
     display_name: Optional[str]
     email: Optional[str]
 
+    @validator("create_date")
+    def convert_datetime(cls, create_date):
+        return create_date.strftime(configs.get_settings().datetime_format) if create_date is not None else None
+
     class Config:
         orm_mode = True
-
