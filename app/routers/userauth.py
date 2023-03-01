@@ -1,7 +1,8 @@
 import json
+from typing import Union
 
 import requests
-from fastapi import APIRouter, Depends, Request, Header, Security
+from fastapi import APIRouter, Depends, Request, Header, Security, Body
 from sqlalchemy.orm import Session
 
 import app.schemas as Schemas
@@ -11,7 +12,7 @@ from app.services import auth_service, user_service
 from configs import get_settings
 from app.database import get_db
 from app.repository import user_repo, token_repo
-from app.schemas.user import User
+from app.schemas.user import User, LogoutSchema
 from app.schemas.common import CommonResponse
 
 router = APIRouter(
@@ -49,16 +50,20 @@ async def login(request: Schemas.ResidentialLoginInput, db: Session = Depends(ge
 
 
 @router.post('/auth/logout')
-async def logout(fcm_token: str, request: Request, db: Session = Depends(get_db)):
+async def logout(
+        data: LogoutSchema,
+        sid: Union[str, None] = Header(default=None),
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
     try:
-        _sid = request.headers.get('sid')
         url = get_settings().residential_server_url + '/api/authenticate/logout'
-        cookies = {'session_id': _sid}
-        headers = {'Content-type': 'application/json', 'X-Openerp': _sid}
+        cookies = {'session_id': sid}
+        headers = {'Content-type': 'application/json', 'X-Openerp': sid}
         json_obj = {}
         rs = requests.post(url=url, json=json_obj, cookies=cookies, headers=headers)
-        await token_repo.del_fcm_token(id=rs.get('data'), fcm_token=fcm_token, db=db)
-        return json.loads(rs.text)
+        await token_repo.del_fcm_token(id=f"{user.id}", fcm_token=data.fcm_token, db=db)
+        return CommonResponse.value(200, 'Logout Success', {})
 
     except Exception as e:
         return CommonResponse.value(500, e.args[0], None)

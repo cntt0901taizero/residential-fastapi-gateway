@@ -26,6 +26,10 @@ class ChangePassword(BaseModel):
     confirm_password: str
 
 
+class LogoutSchema(BaseModel):
+    fcm_token: str
+
+
 class FullInfoUser(BaseModel):
     id: int
     user_type: Optional[str]
