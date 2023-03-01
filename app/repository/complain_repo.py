@@ -10,6 +10,7 @@ async def add_new_complain(db: Session, data, user):
         complain = Complain(name=data.get('name'),
                             content=data.get('content'),
                             blockhouse_id=data.get('blockhouse_id'),
+                            building_house_id=data.get('building_house_id'),
                             building_id=data.get('building_id'),
                             status=ComplainStatus.PENDING.name,
                             user_id=user.id)

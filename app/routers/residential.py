@@ -153,6 +153,7 @@ async def create_claim(
         content: str = Form(),
         blockhouse_id: int = Form(),
         building_id: int = Form(),
+        building_house_id: int = Form(),
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
 ):
@@ -161,6 +162,7 @@ async def create_claim(
                     content=content,
                     blockhouse_id=blockhouse_id,
                     building_id=building_id,
+                    building_house_id=building_house_id,
                     image=image)
         res = await complain_service.add(db, data, user)
         return CommonResponse.value(200, 'Success', res)

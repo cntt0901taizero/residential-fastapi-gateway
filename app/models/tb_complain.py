@@ -15,6 +15,7 @@ class Complain(Base):
     status = Column(String)
     blockhouse_id = Column(Integer)
     building_id = Column(Integer)
+    building_house_id = Column(Integer)
     create_uid = Column(Integer)
     create_date = Column(DateTime, default=datetime.now)
     write_uid = Column(Integer)
