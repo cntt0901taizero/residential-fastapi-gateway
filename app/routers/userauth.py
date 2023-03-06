@@ -29,7 +29,6 @@ async def login(request: Schemas.ResidentialLoginInput, db: Session = Depends(ge
         json_obj = {
             "jsonrpc": "2.0",
             "params": {
-                # "db": 'odoo_db_dev',
                 "login": request.login,
                 "password": request.password
             }
@@ -42,6 +41,8 @@ async def login(request: Schemas.ResidentialLoginInput, db: Session = Depends(ge
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
         data['data']['expires_time'] = str((header[1].split('='))[1])
+        login_time = await user_service.count_user_login(db, data['data']['id'])
+        data['data']['is_first_login'] = True if login_time <= 1 else False
         await token_repo.init_fcm_token(id=data['data']['id'], fcm_token=request.fcm_token, db=db)
         return data
 

@@ -8,11 +8,11 @@ from app.repository.paginate_repo import paginate
 from app.repository import residential_repo
 from app.routers.userauth import check_auth
 from app.schemas.user import User
-from app.schemas.apartment import Apartment
+from app.schemas.apartment import Apartment, House
 from app.schemas.resident import Resident
 from app.schemas.common import CommonResponse, SearchPageInput
 from app.services import auth_service, utilities_service, complain_service, news_service, \
-    banner_service, hand_book_service
+    banner_service, hand_book_service, building_house_service
 from app.utilities.pagination import paging_config
 
 import app.schemas as Schemas
@@ -225,19 +225,37 @@ async def list_banner(
     except Exception as e:
         return CommonResponse.value(500, 'error', None)
 
+
 @router.get(
     '/handbooks',
     summary="List apartment handbook"
 )
-async def list_apartment_utilities(
+async def get_list_handbook(
         current_page: int,
         page_size: int,
         user: User = Security(auth_service.auth_user),
+        house: House = Depends(building_house_service.get_house_info),
         db: Session = Depends(get_db)
 ):
     try:
         params = SearchPageInput(current_page=current_page, page_size=page_size)
-        res = await hand_book_service.get_list(db, params, user)
+        res = await hand_book_service.get_list(db, params, house)
+        return CommonResponse.value(200, 'Success', res)
+    except Exception as e:
+        return CommonResponse.value(500, e.args[0], None)
+
+
+@router.get(
+    '/handbooks/{handbook_id}',
+    summary="Get detail handbook apartment handbook"
+)
+async def get_handbook_detail(
+        handbook_id: int,
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
+    try:
+        res = await hand_book_service.get_detail(db, handbook_id)
         return CommonResponse.value(200, 'Success', res)
     except Exception as e:
         return CommonResponse.value(500, e.args[0], None)

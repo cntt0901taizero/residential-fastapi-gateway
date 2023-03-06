@@ -2,7 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from configs import get_settings
-from app.models import Users, UsersBlockhouse, BuildingHouse, Blockhouse, Building, Partner
+from app.models import Users, UsersBlockhouse, BuildingHouse, Blockhouse, Building, Partner, UsersLog
 
 
 async def get_user_by_id(uid: int, db: Session):
@@ -56,6 +56,7 @@ async def get_user_blockhouse(db: Session, user_id: int):
             Blockhouse.code.label("blockhouse_code"),
             Blockhouse.address.label("blockhouse_address"),
 
+            Building.id.label('building_id'),
             Building.name.label('building_name'),
             Building.code.label('building_code'),
 
@@ -69,5 +70,12 @@ async def get_user_blockhouse(db: Session, user_id: int):
             .filter(UsersBlockhouse.user_id == user_id) \
             .all()
 
+    except Exception as e:
+        return e
+
+
+async def count_user_login(db: Session, user_id: int):
+    try:
+        return db.query(UsersLog.id).filter(UsersLog.create_uid == user_id).count()
     except Exception as e:
         return e

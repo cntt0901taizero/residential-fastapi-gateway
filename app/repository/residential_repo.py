@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlalchemy import text
+from sqlalchemy import text, or_
 from sqlalchemy.orm import Session
 
 from app.constants.common import HanbookStatus
@@ -124,12 +124,26 @@ async def get_utilities_by_block_house_ids(db: Session, block_house_ids, paging:
     return data, total_item
 
 
-async def get_handbooks_by_block_house_ids(db: Session, block_house_ids, paging: Schemas.Paging):
-    query = db.query(ResidentHandbook) \
-        .filter(ResidentHandbook.blockhouse_id.in_(block_house_ids)) \
-        .filter(ResidentHandbook.is_active.is_(True)) \
-        .filter(ResidentHandbook.status == HanbookStatus.ACTIVE.name) \
-        .order_by(ResidentHandbook.create_date.desc())
-    total_item = query.count()
-    data = query.limit(paging.limit).offset(paging.offset).all()
-    return data, total_item
+async def get_handbooks_by_block_house_ids(db: Session, house, paging: Schemas.Paging):
+    try:
+        query = db.query(ResidentHandbook.id, ResidentHandbook.name, ResidentHandbook.create_date) \
+            .filter(
+            or_(
+                ResidentHandbook.blockhouse_id == house.blockhouse_id,
+                ResidentHandbook.building_id == house.building_id
+            )) \
+            .filter(ResidentHandbook.is_active.is_(True)) \
+            .filter(ResidentHandbook.status == HanbookStatus.ACTIVE.name) \
+            .order_by(ResidentHandbook.create_date.desc())
+        total_item = query.count()
+        data = query.limit(paging.limit).offset(paging.offset).all()
+        return data, total_item
+    except Exception as e:
+        return e
+
+
+async def get_handbook_detail(db: Session, handbook_id):
+    try:
+        return db.query(ResidentHandbook).filter(ResidentHandbook.id == handbook_id).first()
+    except Exception as e:
+        return e

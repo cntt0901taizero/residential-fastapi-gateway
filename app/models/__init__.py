@@ -10,3 +10,4 @@ from .tb_building_house import BuildingHouse
 from .tb_register_delivery import RegisterDelivery
 from .tb_building import Building
 from .res_partner import Partner
+from .res_users_log import UsersLog

@@ -13,3 +13,14 @@ class Apartment(BaseModel):
     floor: int
     bloc_house: str
     residents: List[Resident]
+
+
+class House(BaseModel):
+    id: int
+    name: str
+    blockhouse_id: int
+    building_id: int
+    building_floors_id: int
+
+    class Config:
+        orm_mode = True

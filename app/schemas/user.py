@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, validator
 
@@ -40,6 +40,36 @@ class FullInfoUser(BaseModel):
     phone: Optional[str]
     display_name: Optional[str]
     email: Optional[str]
+
+    @validator("create_date")
+    def convert_datetime(cls, create_date):
+        return create_date.strftime(configs.get_settings().datetime_format) if create_date is not None else None
+
+    class Config:
+        orm_mode = True
+
+
+class Handbook(BaseModel):
+    id: int
+    name: str
+    image: Optional[str]
+    create_date: datetime.datetime
+
+    @validator("create_date")
+    def convert_datetime(cls, create_date):
+        return create_date.strftime(configs.get_settings().datetime_format) if create_date is not None else None
+
+    class Config:
+        orm_mode = True
+
+
+class HandbookDetail(BaseModel):
+    id: int
+    name: Optional[str]
+    description: Optional[str]
+    detail_description: Optional[str]
+    image: Optional[str]
+    create_date: datetime.datetime
 
     @validator("create_date")
     def convert_datetime(cls, create_date):
