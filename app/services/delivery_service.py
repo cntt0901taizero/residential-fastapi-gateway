@@ -8,6 +8,7 @@ from app.utilities import pagination
 from app.utilities.pagination import parsing_pagination
 from app.exceptions import exceptions
 
+
 async def register_delivery(db, user, house, data):
     delivery_detail = await delivery_repo.register_delivery(db, user, house, data)
     return delivery_detail

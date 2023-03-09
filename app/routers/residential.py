@@ -274,7 +274,7 @@ async def get_delivery(
     '/delivery/{delivery_id}',
     summary="Detail delivery"
 )
-async def get_delivery(
+async def get_delivery_detail(
         delivery_id: int,
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
