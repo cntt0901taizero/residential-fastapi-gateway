@@ -242,7 +242,7 @@ async def get_handbook_detail(
 
 
 @router.post(
-    '/register-delivery',
+    '/delivery',
     summary="Register delivery"
 )
 async def register_delivery(
@@ -256,7 +256,7 @@ async def register_delivery(
 
 
 @router.get(
-    '/register-delivery',
+    '/delivery',
     summary="List user register delivery"
 )
 async def get_delivery(
