@@ -136,12 +136,9 @@ async def list_apartment_utilities(
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
 ):
-    try:
-        params = SearchPageInput(current_page=current_page, page_size=page_size)
-        res = await utilities_service.get_list(db, params, user)
-        return CommonResponse.value(200, 'Success', res)
-    except Exception as e:
-        return CommonResponse.value(500, e.args[0], None)
+    params = SearchPageInput(current_page=current_page, page_size=page_size)
+    res = await utilities_service.get_list(db, params, user)
+    return CommonResponse.value(200, 'Success', res)
 
 
 @router.post(
@@ -158,36 +155,32 @@ async def create_claim(
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
 ):
-    try:
-        data = dict(name=name,
-                    content=content,
-                    blockhouse_id=blockhouse_id,
-                    building_id=building_id,
-                    building_house_id=building_house_id,
-                    image=image)
-        res = await complain_service.add(db, data, user)
-        return CommonResponse.value(200, 'Success', res)
-    except Exception as e:
-        return CommonResponse.value(500, 'error', None)
+    data = dict(name=name,
+                content=content,
+                blockhouse_id=blockhouse_id,
+                building_id=building_id,
+                building_house_id=building_house_id,
+                image=image)
+    res = await complain_service.add(db, data, user)
+    return CommonResponse.value(200, 'Success', res)
 
 
 @router.get(
     '/complain',
     summary="List residential complain"
 )
-async def get_claim(status: str,
-                    current_page: int,
-                    page_size: int,
-                    user: User = Security(auth_service.auth_user),
-                    db: Session = Depends(get_db)):
-    try:
-        data = dict(status=status,
-                    current_page=current_page,
-                    page_size=page_size)
-        res = await complain_service.get_list(db, data, user)
-        return CommonResponse.value(200, 'Success', res)
-    except Exception as e:
-        return CommonResponse.value(500, 'error', None)
+async def get_claim(
+        status: str,
+        current_page: int,
+        page_size: int,
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
+    data = dict(status=status,
+                current_page=current_page,
+                page_size=page_size)
+    res = await complain_service.get_list(db, data, user)
+    return CommonResponse.value(200, 'Success', res)
 
 
 @router.get(
@@ -200,13 +193,9 @@ async def list_news(
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
 ):
-    try:
-        page_config = paging_config(current_page, page_size)
-        data = await news_service.get_list(db, page_config)
-
-        return CommonResponse.value(200, 'Success', data)
-    except Exception as e:
-        return CommonResponse.value(500, 'error', None)
+    page_config = paging_config(current_page, page_size)
+    data = await news_service.get_list(db, page_config)
+    return CommonResponse.value(200, 'Success', data)
 
 
 @router.get(
@@ -219,12 +208,8 @@ async def list_banner(
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
 ):
-    try:
-        data = await banner_service.get_list(db, current_page, page_size, user)
-
-        return CommonResponse.value(200, 'Success', data)
-    except Exception as e:
-        return CommonResponse.value(500, 'error', None)
+    data = await banner_service.get_list(db, current_page, page_size, user)
+    return CommonResponse.value(200, 'Success', data)
 
 
 @router.get(
@@ -238,12 +223,9 @@ async def get_list_handbook(
         house: House = Depends(building_house_service.get_house_info),
         db: Session = Depends(get_db)
 ):
-    try:
-        params = SearchPageInput(current_page=current_page, page_size=page_size)
-        res = await hand_book_service.get_list(db, params, house)
-        return CommonResponse.value(200, 'Success', res)
-    except Exception as e:
-        return CommonResponse.value(500, e.args[0], None)
+    params = SearchPageInput(current_page=current_page, page_size=page_size)
+    res = await hand_book_service.get_list(db, params, house)
+    return CommonResponse.value(200, 'Success', res)
 
 
 @router.get(
@@ -255,11 +237,8 @@ async def get_handbook_detail(
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
 ):
-    try:
-        res = await hand_book_service.get_detail(db, handbook_id)
-        return CommonResponse.value(200, 'Success', res)
-    except Exception as e:
-        return CommonResponse.value(500, e.args[0], None)
+    res = await hand_book_service.get_detail(db, handbook_id)
+    return CommonResponse.value(200, 'Success', res)
 
 
 @router.post(

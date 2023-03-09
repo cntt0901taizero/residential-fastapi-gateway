@@ -85,3 +85,9 @@ class QueryDataError(BaseAPIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     error_code = "QUERY_DATA_ERROR"
     default_message = "QUERY_DATA_ERROR"
+
+
+class APIAuthenticationError(BaseAPIException):
+    status_code = status.HTTP_424_FAILED_DEPENDENCY
+    error_code = "HTTP_424_FAILED_DEPENDENCY"
+    default_message = "Failure to call authentication API"

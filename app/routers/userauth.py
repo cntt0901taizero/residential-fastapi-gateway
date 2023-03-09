@@ -100,11 +100,8 @@ async def change_password(
         user: Schemas.User = Security(AuthService.auth_user),
         sid: str = Header()
 ):
-    try:
-        result = await UserService.change_password(data, sid)
-        return CommonResponse.value(200, 'Success', result)
-    except Exception as e:
-        return CommonResponse.value(500, 'Error', None)
+    result = await UserService.change_password(data, sid)
+    return CommonResponse.value(200, 'Success', result)
 
 
 @router.get('/user')
@@ -112,9 +109,5 @@ async def get_user(
         user: User = Security(auth_service.auth_user),
         db: Session = Depends(get_db)
 ):
-    try:
-        result = await user_service.get_detail_user(db, user.id)
-        return CommonResponse.value(200, 'Success', result)
-
-    except Exception as e:
-        return CommonResponse.value(500, e.args[0], None)
+    result = await user_service.get_detail_user(db, user.id)
+    return CommonResponse.value(200, 'Success', result)
