@@ -1,5 +1,14 @@
 from typing import List, Optional, Any
+
+from humps.main import camelize
 from pydantic import BaseModel
+
+
+class PydanticModel(BaseModel):
+    class Config:
+        alias_generator = camelize
+        allow_population_by_field_name = True
+        orm_mode = True
 
 
 class GetByIdInput(BaseModel):

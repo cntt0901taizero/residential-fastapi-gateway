@@ -1,6 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app import exceptions
 from configs import get_settings
 from app.models import Users, UsersBlockhouse, BuildingHouse, Blockhouse, Building, Partner, UsersLog
 
@@ -21,7 +22,7 @@ async def get_user_detail(db: Session, user_id: int):
     try:
         return db.query(Users).filter(Users.id == user_id).first()
     except Exception as e:
-        return False
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))
 
 
 async def get_full_info(db: Session, user_id):
@@ -41,7 +42,7 @@ async def get_full_info(db: Session, user_id):
             .filter(Users.id == user_id) \
             .first()
     except Exception as e:
-        return e
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))
 
 
 async def get_user_blockhouse(db: Session, user_id: int):
@@ -71,11 +72,11 @@ async def get_user_blockhouse(db: Session, user_id: int):
             .all()
 
     except Exception as e:
-        return e
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))
 
 
 async def count_user_login(db: Session, user_id: int):
     try:
         return db.query(UsersLog.id).filter(UsersLog.create_uid == user_id).count()
     except Exception as e:
-        return e
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))

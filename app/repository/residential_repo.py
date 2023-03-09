@@ -2,6 +2,7 @@ from fastapi import Depends
 from sqlalchemy import text, or_
 from sqlalchemy.orm import Session
 
+from app import exceptions
 from app.constants.common import HanbookStatus
 from configs import get_settings
 from app.database import get_db
@@ -115,13 +116,16 @@ async def get_user_block_house(user_id, db: Session):
 
 
 async def get_utilities_by_block_house_ids(db: Session, block_house_ids, paging: Schemas.Paging):
-    query = db.query(ApartmentUtilities) \
-        .filter(ApartmentUtilities.blockhouse_id.in_(block_house_ids)) \
-        .filter(ApartmentUtilities.is_active.is_(True)) \
-        .order_by(ApartmentUtilities.create_date.desc())
-    total_item = query.count()
-    data = query.limit(paging.limit).offset(paging.offset).all()
-    return data, total_item
+    try:
+        query = db.query(ApartmentUtilities) \
+            .filter(ApartmentUtilities.blockhouse_id.in_(block_house_ids)) \
+            .filter(ApartmentUtilities.is_active.is_(True)) \
+            .order_by(ApartmentUtilities.create_date.desc())
+        total_item = query.count()
+        data = query.limit(paging.limit).offset(paging.offset).all()
+        return data, total_item
+    except Exception as e:
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))
 
 
 async def get_handbooks_by_block_house_ids(db: Session, house, paging: Schemas.Paging):
@@ -139,11 +143,11 @@ async def get_handbooks_by_block_house_ids(db: Session, house, paging: Schemas.P
         data = query.limit(paging.limit).offset(paging.offset).all()
         return data, total_item
     except Exception as e:
-        return e
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))
 
 
 async def get_handbook_detail(db: Session, handbook_id):
     try:
         return db.query(ResidentHandbook).filter(ResidentHandbook.id == handbook_id).first()
     except Exception as e:
-        return e
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))

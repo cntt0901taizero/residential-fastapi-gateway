@@ -3,7 +3,6 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
 from configs import DB_URL
 
 logger = logging.getLogger(__name__)
@@ -17,12 +16,8 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
-    except Exception as e:
-        logger.exception('Session rollback cause EX: ' + str(e.args[0]))
+    except Exception:
         db.rollback()
         raise
     finally:
         db.close()
-
-
-

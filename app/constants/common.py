@@ -1,6 +1,12 @@
 from enum import Enum
 
 
+class Status(Enum):
+    PENDING = 'pending'
+    ACTIVE = 'active'
+    REJECT = 'reject'
+
+
 class ComplainStatus(Enum):
     PENDING = 'pending'
     ACTIVE = 'active'

@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app import exceptions
 from app.constants.common import ComplainStatus
 from app.models.tb_complain import Complain
 from app.utilities.upload import upload_image
@@ -20,7 +21,7 @@ async def add_new_complain(db: Session, data, user):
         await upload_image(data.get('image'), 'tb_complain', complain.id)
         return complain
     except Exception as e:
-        return e
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))
 
 
 async def get_list(db: Session, filter_data, paging, user):
@@ -33,4 +34,4 @@ async def get_list(db: Session, filter_data, paging, user):
         data = query.limit(paging.limit).offset(paging.offset).all()
         return data, total
     except Exception as e:
-        return e
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))

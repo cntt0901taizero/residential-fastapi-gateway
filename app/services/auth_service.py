@@ -1,11 +1,14 @@
 import json
+
 import requests
-from fastapi import Header, HTTPException, Depends
+from fastapi import Header, Depends
 from fastapi.security import SecurityScopes
 from sqlalchemy.orm import Session
-from configs import get_settings
+
 from app.database import get_db
+from app import exceptions
 from app.repository import user_repo
+from configs import get_settings
 
 
 async def get_login_data(sid: str):
@@ -23,9 +26,9 @@ async def auth_user(
         db: Session = Depends(get_db)
 ):
     if not sid:
-        raise HTTPException(status_code=400, detail="sid header invalid")
+        raise exceptions.InvalidCredentials(status_code=400, default_message="sid không được trống")
     login_data = await get_login_data(sid)
     if not login_data.get('data'):
-        raise HTTPException(status_code=400, detail="sid header invalid")
+        raise exceptions.InvalidCredentials(status_code=400, default_message="Phiên đăng nhập hết hạn")
     user = await user_repo.get_user_detail(db, login_data.get('data'))
     return user

@@ -4,9 +4,9 @@ from pathlib import Path
 import uvicorn
 from fastapi import FastAPI
 
-from configs import get_settings
+from app.exceptions.exception_handlers import add_exception_handlers
 from app.routers import userauth, residential
-
+from configs import get_settings
 
 app = FastAPI()
 app.include_router(userauth.router)
@@ -22,6 +22,8 @@ async def startup_event():
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [ in %(pathname)s:%(lineno)d] %(message)s"))
     logger.addHandler(handler)
 
+
+add_exception_handlers(app)
 
 if __name__ == '__main__':
     uvicorn.run(app, host=get_settings().uvicorn_host, port=int(get_settings().uvicorn_port))

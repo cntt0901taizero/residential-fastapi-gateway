@@ -1,6 +1,7 @@
+import datetime
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 from app.schemas.resident import Resident
 
@@ -24,3 +25,12 @@ class House(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class RegisterDelivery(BaseModel):
+    shipping_method: str
+    through_method: str
+    time_start: str
+    time_end: str
+    freight_detail: str
+    use_freight_elevator: bool

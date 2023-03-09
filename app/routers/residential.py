@@ -1,21 +1,22 @@
+from typing import Union
+
 from fastapi import APIRouter, Path, Security, UploadFile, Form
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 from starlette import status as http_status
 
-from app.database import get_db
-from app.repository.paginate_repo import paginate
-from app.repository import residential_repo
-from app.routers.userauth import check_auth
-from app.schemas.user import User
-from app.schemas.apartment import Apartment, House
-from app.schemas.resident import Resident
-from app.schemas.common import CommonResponse, SearchPageInput
-from app.services import auth_service, utilities_service, complain_service, news_service, \
-    banner_service, hand_book_service, building_house_service
-from app.utilities.pagination import paging_config
-
 import app.schemas as Schemas
+from app.database import get_db
+from app.repository import residential_repo
+from app.repository.paginate_repo import paginate
+from app.routers.userauth import check_auth
+from app.schemas.apartment import Apartment, House, RegisterDelivery
+from app.schemas.common import CommonResponse, SearchPageInput
+from app.schemas.resident import Resident
+from app.schemas.user import User
+from app.services import auth_service, utilities_service, complain_service, news_service, \
+    banner_service, hand_book_service, building_house_service, delivery_service
+from app.utilities.pagination import paging_config
 
 router = APIRouter(
     prefix="/residential",
@@ -259,3 +260,32 @@ async def get_handbook_detail(
         return CommonResponse.value(200, 'Success', res)
     except Exception as e:
         return CommonResponse.value(500, e.args[0], None)
+
+
+@router.post(
+    '/register-delivery',
+    summary="Register delivery"
+)
+async def register_delivery(
+        data: RegisterDelivery,
+        user: User = Security(auth_service.auth_user),
+        house: House = Depends(building_house_service.get_house_info),
+        db: Session = Depends(get_db)
+):
+    delivery = await delivery_service.register_delivery(db, user, house, data)
+    return CommonResponse.value(200, 'Success', delivery)
+
+
+@router.get(
+    '/register-delivery',
+    summary="List user register delivery"
+)
+async def get_delivery(
+        current_page: Union[int, None] = 1,
+        page_size: Union[int, None] = 10,
+        status: Union[str, None] = None,
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
+    data = await delivery_service.get_delivery(db, user, current_page, page_size, status)
+    return CommonResponse.value(200, "Success", data)
