@@ -268,3 +268,16 @@ async def get_delivery(
 ):
     data = await delivery_service.get_delivery(db, user, current_page, page_size, status)
     return CommonResponse.value(200, "Success", data)
+
+
+@router.get(
+    '/delivery/{delivery_id}',
+    summary="Detail delivery"
+)
+async def get_delivery(
+        delivery_id: int,
+        user: User = Security(auth_service.auth_user),
+        db: Session = Depends(get_db)
+):
+    data = await delivery_service.get_delivery_by_id(db, user, delivery_id)
+    return CommonResponse.value(200, "Success", data)

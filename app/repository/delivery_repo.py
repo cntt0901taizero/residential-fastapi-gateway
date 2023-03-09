@@ -44,3 +44,12 @@ async def list_delivery(db: Session, user, paging, status=None):
         return data, total_item
     except Exception as e:
         raise exceptions.QueryDataError(status_code=500, default_message=str(e))
+
+
+async def get_delivery_by_id(db, user, delivery_id):
+    try:
+        return db.query(RegisterDelivery).filter(RegisterDelivery.create_uid == user.id) \
+            .filter(RegisterDelivery.id == delivery_id) \
+            .first()
+    except exceptions as e:
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))
