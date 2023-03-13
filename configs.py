@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     db_name: str = "odoo_db"
     db_echo: bool = False
 
-    datetime_format = "%m/%d/%Y %H:%M:%S"
+    datetime_format = "%d/%m/%Y %H:%M:%S"
 
     class Config:
         env_file = ".env"

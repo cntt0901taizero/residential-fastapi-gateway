@@ -1,8 +1,9 @@
-import datetime
+from datetime import datetime
 from typing import List
 
 from pydantic import BaseModel, validator
 
+import configs
 from app.schemas.resident import Resident
 
 
@@ -34,3 +35,9 @@ class RegisterDelivery(BaseModel):
     time_end: str
     freight_detail: str
     use_freight_elevator: bool
+
+    @validator("time_start", "time_end", each_item=True)
+    def convert_datetime(cls, v):
+        return datetime.strptime(v, configs.get_settings().datetime_format)
+
+        # return v.strftime(configs.get_settings().datetime_format) if v is not None else None
