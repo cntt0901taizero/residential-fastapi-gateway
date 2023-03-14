@@ -41,8 +41,8 @@ async def login(request: Schemas.ResidentialLoginInput, db: Session = Depends(ge
         data = json.loads(rs.text)
         data['data']['sid'] = str((header[0].split('='))[1])
         data['data']['expires_time'] = str((header[1].split('='))[1])
-        login_time = await user_service.count_user_login(db, data['data']['id'])
-        data['data']['is_first_login'] = True if login_time <= 1 else False
+        user = await user_service.get_user_change_pass(db, data['data']['id'])
+        data['data']['mobile_change_password'] = user.mobile_change_password
         await token_repo.init_fcm_token(id=data['data']['id'], fcm_token=request.fcm_token, db=db)
         return data
 
@@ -98,9 +98,10 @@ async def get_user(request: Request, db: Session = Depends(get_db)):
 async def change_password(
         data: Schemas.ChangePassword,
         user: Schemas.User = Security(AuthService.auth_user),
-        sid: str = Header()
+        sid: str = Header(),
+        db: Session = Depends(get_db)
 ):
-    result = await UserService.change_password(data, sid)
+    result = await UserService.change_password(data, sid, user, db)
     return CommonResponse.value(200, 'Success', result)
 
 

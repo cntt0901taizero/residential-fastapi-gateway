@@ -75,8 +75,17 @@ async def get_user_blockhouse(db: Session, user_id: int):
         raise exceptions.QueryDataError(status_code=500, default_message=str(e))
 
 
-async def count_user_login(db: Session, user_id: int):
+async def user_change_pass(db: Session, user_id: int):
     try:
-        return db.query(UsersLog.id).filter(UsersLog.create_uid == user_id).count()
+        return db.query(Users.mobile_change_password).filter(Users.id == user_id).first()
+    except Exception as e:
+        raise exceptions.QueryDataError(status_code=500, default_message=str(e))
+
+
+async def set_change_pass(db: Session, user_id: int):
+    try:
+        db.query(Users).filter(Users.id == user_id) \
+            .update({Users.mobile_change_password: True})
+        db.commit()
     except Exception as e:
         raise exceptions.QueryDataError(status_code=500, default_message=str(e))

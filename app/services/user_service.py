@@ -1,15 +1,14 @@
-import requests
 import json
 
+import requests
 from sqlalchemy.orm import Session
 
 from app.repository import user_repo
 from app.schemas import FullInfoUser
-from app.utilities.common import get_data_image
 from configs import get_settings
 
 
-async def change_password(data, sid):
+async def change_password(data, sid, user, db: Session):
     auth_url = get_settings().residential_server_url + '/api/users/update_password'
     cookies = {'session_id': sid}
     headers = {'Content-type': 'application/json', 'X-Openerp': sid}
@@ -23,6 +22,7 @@ async def change_password(data, sid):
         }
     }
     rs = requests.post(url=auth_url, json=json_obj, cookies=cookies, headers=headers)
+    await user_repo.set_change_pass(db, user.id)
     return json.loads(rs.text)
 
 
@@ -39,9 +39,9 @@ async def get_detail_user(db: Session, user_id):
         return e
 
 
-async def count_user_login(db: Session, user_id):
+async def get_user_change_pass(db: Session, user_id):
     try:
-        login_time = await user_repo.count_user_login(db, user_id)
+        login_time = await user_repo.user_change_pass(db, user_id)
         return login_time
     except Exception as e:
         return e

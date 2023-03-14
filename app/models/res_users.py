@@ -26,3 +26,4 @@ class Users(Base):
     date_of_birth = Column(Date)
     gender = Column(String)
     user_type = Column(String)
+    mobile_change_password = Column(Boolean)
