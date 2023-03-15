@@ -11,3 +11,4 @@ from .tb_register_delivery import RegisterDelivery
 from .tb_building import Building
 from .res_partner import Partner
 from .res_users_log import UsersLog
+from .tb_vehicle import Vehicle

@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from typing import List
 
 from pydantic import BaseModel, validator
@@ -38,6 +38,32 @@ class RegisterDelivery(BaseModel):
 
     @validator("time_start", "time_end", each_item=True)
     def convert_datetime(cls, v):
-        return datetime.strptime(v, configs.get_settings().datetime_format)
+        return datetime.datetime.strptime(v, configs.get_settings().datetime_format)
 
-        # return v.strftime(configs.get_settings().datetime_format) if v is not None else None
+
+class VehicleIn(BaseModel):
+    name: str
+    vehicle_type: str
+    note: str
+    license_plates: str
+    vehicle_color: str
+    vehicle_brand: str
+    date_of_birth: str
+    phone: str
+    citizen_identification: int
+    relationship_type: str
+
+    @validator('date_of_birth')
+    def convert_datetime(cls, v):
+        return datetime.datetime.strptime(v, configs.get_settings().date_format).date()
+
+    @validator('relationship_type')
+    def relationship_type_validate(cls, v):
+        assert v in ['chuho', 'ongba', 'bome', 'vochong', 'concai', 'anhchiem',
+                         'nguoithue'], 'Phải là 1 trong các type chuho, ongba, bome, vochong, concai, anhchiem, nguoithue '
+        return v
+
+    @validator('vehicle_type')
+    def vehicle_type_validate(cls, v):
+        assert v in ['bicycle', 'motorbike', 'car'], 'Phải là 1 trong các type bicycle, motorbike, car'
+        return v

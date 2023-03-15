@@ -2,20 +2,22 @@ from typing import Union
 
 from fastapi import APIRouter, Path, Security, UploadFile, Form
 from fastapi import Depends, Request
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 from starlette import status as http_status
 
 import app.schemas as Schemas
+from app import exceptions
 from app.database import get_db
 from app.repository import residential_repo
 from app.repository.paginate_repo import paginate
 from app.routers.userauth import check_auth
-from app.schemas.apartment import Apartment, House, RegisterDelivery
+from app.schemas.apartment import Apartment, House, RegisterDelivery, VehicleIn
 from app.schemas.common import CommonResponse, SearchPageInput
 from app.schemas.resident import Resident
 from app.schemas.user import User
 from app.services import auth_service, utilities_service, complain_service, news_service, \
-    banner_service, hand_book_service, building_house_service, delivery_service
+    banner_service, hand_book_service, building_house_service, delivery_service, vehicle_service
 from app.utilities.pagination import paging_config
 
 router = APIRouter(
@@ -249,7 +251,8 @@ async def register_delivery(
         data: RegisterDelivery,
         user: User = Security(auth_service.auth_user),
         house: House = Depends(building_house_service.get_house_info),
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+
 ):
     delivery = await delivery_service.register_delivery(db, user, house, data)
     return CommonResponse.value(200, 'Success', delivery)
@@ -287,11 +290,45 @@ async def get_delivery_detail(
     '/vehicle',
     summary="Detail delivery"
 )
-async def get_delivery_detail(
-        delivery_id: int,
+async def register_vehicle(
+        image_citizen_identification_font: UploadFile,
+        image_citizen_identification_back: UploadFile,
+        image_vehicle_registration_certificate_font: Union[UploadFile, None] = None,
+        image_vehicle_registration_certificate_back: Union[UploadFile, None] = None,
+        name: str = Form(),
+        vehicle_type: str = Form(),
+        note: str = Form(),
+        license_plates: str = Form(),
+        vehicle_color: str = Form(),
+        vehicle_brand: str = Form(),
+        date_of_birth: str = Form(),
+        phone: str = Form(),
+        citizen_identification: int = Form(),
+        relationship_type: str = Form(),
         user: User = Security(auth_service.auth_user),
         house: House = Depends(building_house_service.get_house_info),
         db: Session = Depends(get_db)
 ):
-    data = await delivery_service.get_delivery_by_id(db, user, delivery_id)
+    try:
+        vehicle = VehicleIn(
+            name=name,
+            vehicle_type=vehicle_type,
+            note=note,
+            license_plates=license_plates,
+            vehicle_color=vehicle_color,
+            vehicle_brand=vehicle_brand,
+            date_of_birth=date_of_birth,
+            phone=phone,
+            citizen_identification=citizen_identification,
+            relationship_type=relationship_type,
+        )
+    except ValidationError as e:
+        raise exceptions.ParameterError(status_code=500, default_message=str(e))
+    images = dict(
+        image_citizen_identification_font=image_citizen_identification_font,
+        image_citizen_identification_back=image_citizen_identification_back,
+        image_vehicle_registration_certificate_font=image_vehicle_registration_certificate_font,
+        image_vehicle_registration_certificate_back=image_vehicle_registration_certificate_back,
+    )
+    data = await vehicle_service.register_vehicle(db, user, house, vehicle.dict(), images)
     return CommonResponse.value(200, "Success", data)
