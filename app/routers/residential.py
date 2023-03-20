@@ -288,7 +288,7 @@ async def get_delivery_detail(
 
 @router.post(
     '/vehicle',
-    summary="Detail delivery"
+    summary="Register vehicle"
 )
 async def register_vehicle(
         image_citizen_identification_font: UploadFile,
@@ -297,7 +297,6 @@ async def register_vehicle(
         image_vehicle_registration_certificate_back: Union[UploadFile, None] = None,
         name: str = Form(),
         vehicle_type: str = Form(),
-        note: str = Form(),
         license_plates: str = Form(),
         vehicle_color: str = Form(),
         vehicle_brand: str = Form(),
@@ -313,7 +312,6 @@ async def register_vehicle(
         vehicle = VehicleIn(
             name=name,
             vehicle_type=vehicle_type,
-            note=note,
             license_plates=license_plates,
             vehicle_color=vehicle_color,
             vehicle_brand=vehicle_brand,
@@ -331,4 +329,17 @@ async def register_vehicle(
         image_vehicle_registration_certificate_back=image_vehicle_registration_certificate_back,
     )
     data = await vehicle_service.register_vehicle(db, user, house, vehicle.dict(), images)
+    return CommonResponse.value(200, "Success", data)
+
+
+@router.get(
+    '/vehicle',
+    summary="Get list register vehicle"
+)
+async def register_vehicle(
+        user: User = Security(auth_service.auth_user),
+        house: House = Depends(building_house_service.get_house_info),
+        db: Session = Depends(get_db)
+):
+    data = await vehicle_service.list_vehicle(db, user, house)
     return CommonResponse.value(200, "Success", data)

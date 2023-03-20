@@ -44,7 +44,6 @@ class RegisterDelivery(BaseModel):
 class VehicleIn(BaseModel):
     name: str
     vehicle_type: str
-    note: str
     license_plates: str
     vehicle_color: str
     vehicle_brand: str

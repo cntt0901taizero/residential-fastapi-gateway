@@ -11,3 +11,8 @@ async def register_vehicle(db, user, house, data, images):
             await upload.upload_image(image_data, 'tb_vehicle', vehicle.id, image_name)
 
     return vehicle
+
+
+async def list_vehicle(db, user, house):
+    vehicles = await vehicle_repo.list_vehicle(db, user, house)
+    return vehicles
