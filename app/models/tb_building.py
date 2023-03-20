@@ -7,6 +7,7 @@ class Building(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
+    name_display = Column(String)
     code = Column(String)
     address = Column(String)
     founding_date = Column(DateTime)
