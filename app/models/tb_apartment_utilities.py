@@ -8,6 +8,7 @@ class ApartmentUtilities(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
+    name_display = Column(String)
     description = Column(String)
     detail_description = Column(String)
     is_active = Column(Boolean)
