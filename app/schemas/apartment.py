@@ -44,7 +44,7 @@ class RegisterDelivery(BaseModel):
 class VehicleIn(BaseModel):
     name: str
     vehicle_type: str
-    license_plates: str
+    license_plates: str = None
     vehicle_color: str
     vehicle_brand: str
     date_of_birth: str
@@ -59,7 +59,7 @@ class VehicleIn(BaseModel):
     @validator('relationship_type')
     def relationship_type_validate(cls, v):
         assert v in ['chuho', 'ongba', 'bome', 'vochong', 'concai', 'anhchiem',
-                         'nguoithue'], 'Phải là 1 trong các type chuho, ongba, bome, vochong, concai, anhchiem, nguoithue '
+                     'nguoithue'], 'Phải là 1 trong các type chuho, ongba, bome, vochong, concai, anhchiem, nguoithue '
         return v
 
     @validator('vehicle_type')

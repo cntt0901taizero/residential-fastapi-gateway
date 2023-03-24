@@ -59,10 +59,12 @@ async def get_user_blockhouse(db: Session, user_id: int):
 
             Building.id.label('building_id'),
             Building.name.label('building_name'),
+            Building.name_display.label('building_name_display'),
             Building.code.label('building_code'),
 
             BuildingHouse.id.label("house_id"),
             BuildingHouse.name.label("house_name"),
+            BuildingHouse.name_display.label("house_name_display"),
             BuildingHouse.code.label("house_code"),
         ) \
             .join(Blockhouse, Blockhouse.id == UsersBlockhouse.blockhouse_id) \

@@ -5,6 +5,7 @@ from fastapi import Depends, Request
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 from starlette import status as http_status
+from typing_extensions import Annotated
 
 import app.schemas as Schemas
 from app import exceptions
@@ -295,9 +296,9 @@ async def register_vehicle(
         image_citizen_identification_back: UploadFile,
         image_vehicle_registration_certificate_font: Union[UploadFile, None] = None,
         image_vehicle_registration_certificate_back: Union[UploadFile, None] = None,
+        license_plates:  Annotated[Union[str, None], Form()] = None,
         name: str = Form(),
         vehicle_type: str = Form(),
-        license_plates: str = Form(),
         vehicle_color: str = Form(),
         vehicle_brand: str = Form(),
         date_of_birth: str = Form(),
